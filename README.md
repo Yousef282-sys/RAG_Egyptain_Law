@@ -240,6 +240,17 @@ python3 -c "from src.rag.vector_store import build_index_from_json; \
   print(build_index_from_json('data/processed/civil_code.json', 'data/vector_store'))"
 ```
 
+### Generation (vLLM) and streaming
+`/ask` retrieves article chunks, then generates through a vLLM
+OpenAI-compatible server (`src/rag/generation.py`). Set
+`GENERATION_MODEL` (and `VLLM_BASE_URL`, default `http://localhost:8001/v1`)
+to enable it; with `GENERATION_MODEL` unset the API runs in an explicitly
+labelled **retrieval-only** mode (`/health` reports `generation_is_llm`).
+`POST /ask/stream` returns server-sent events: `sources`, `token`…, `done`.
+**UNVERIFIED against a real vLLM server** (none available in development);
+the HTTP/SSE handling is tested against a local fake server only.
+`docker compose --profile gpu up` starts the vLLM service (needs a GPU).
+
 ### Run the API
 Requires the `api` extra (`fastapi`, `pydantic>=2`, `uvicorn`) — **not
 installed in this sandbox**; install and run in an environment with

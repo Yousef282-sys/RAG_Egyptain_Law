@@ -176,3 +176,44 @@ def test_ask_logs_a_structured_event_without_question_text():
         for event in events:
             assert "ما هو عقد البيع" not in str(event)
             assert set(event.keys()).issubset(obs_logger.ALLOWED_EVENT_FIELDS)
+
+
+def test_health_reports_generator_and_index_info():
+    if not API_AVAILABLE:
+        return _skip("test_health_reports_generator_and_index_info")
+    body = _client.get("/health").json()
+    assert body["status"] == "ok"
+    assert "generator" in body and "generation_is_llm" in body
+    assert "index_available" in body
+
+
+def test_ask_stream_empty_question_returns_422():
+    if not API_AVAILABLE:
+        return _skip("test_ask_stream_empty_question_returns_422")
+    assert _client.post("/ask/stream", json={"question": ""}).status_code == 422
+
+
+def test_ask_stream_emits_sources_then_tokens_then_done_with_fake_service():
+    if not API_AVAILABLE:
+        return _skip("test_ask_stream_emits_sources_then_tokens_then_done_with_fake_service")
+    import json
+
+    from src.api import main as api_main
+    from src.rag.generation import RetrievalOnlyGenerator
+
+    class _R:
+        def retrieve(self, q, top_k=None):
+            return [{"article_number": 147, "text_ar": "نص", "text_en": None, "citation": "المادة 147"}]
+
+    saved = (api_main._retriever, api_main._generator)
+    try:
+        api_main._retriever, api_main._generator = _R(), RetrievalOnlyGenerator()
+        resp = _client.post("/ask/stream", json={"question": "سؤال"})
+        assert resp.status_code == 200
+        events = [json.loads(l[6:]) for l in resp.text.split("\n\n") if l.startswith("data: ")]
+        assert [e["type"] for e in events] == ["sources", "token", "done"]
+        assert events[0]["sources"][0]["article_number"] == 147
+        ask = _client.post("/ask", json={"question": "سؤال"}).json()
+        assert ask["sources"][0]["article_number"] == 147 and ask["answer"]
+    finally:
+        api_main._retriever, api_main._generator = saved

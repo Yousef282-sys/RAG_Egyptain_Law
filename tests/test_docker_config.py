@@ -45,3 +45,16 @@ def test_dockerignore_excludes_generated_vector_store_and_raw_pdf():
     content = DOCKERIGNORE.read_text(encoding="utf-8")
     assert "data/vector_store" in content
     assert "data/raw" in content
+
+
+def test_compose_defines_api_indexer_and_optional_vllm():
+    # Structure check only -- compose was NOT run (no docker in sandbox).
+    import yaml  # PyYAML is already used by tests/test_ci_workflow.py
+
+    compose = yaml.safe_load(Path("docker-compose.yml").read_text(encoding="utf-8"))
+    services = compose["services"]
+    assert {"api", "indexer", "vllm"} <= set(services)
+    assert "gpu" in services["vllm"]["profiles"]  # GPU service is opt-in
+    env = services["api"]["environment"]
+    assert "GENERATION_MODEL" in env and "VLLM_BASE_URL" in env
+    assert "8000:8000" in services["api"]["ports"]

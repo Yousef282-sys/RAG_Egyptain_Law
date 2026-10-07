@@ -52,3 +52,15 @@ def test_bento_service_ask_is_a_coroutine_function():
     import inspect
 
     assert inspect.iscoroutinefunction(ArabicLegalRAGService.ask)
+
+
+def test_bento_service_wraps_shared_rag_service_and_exposes_stream():
+    # Pure source inspection (no bentoml import needed).
+    import inspect
+    from pathlib import Path
+
+    source = Path("src/serving/bento_service.py").read_text(encoding="utf-8")
+    assert "from src.rag.service import RagService" in source
+    assert "async def ask_stream" in source and "AsyncGenerator" in source
+    assert "retrieval-only" not in source  # no duplicated answer-building logic
+    assert inspect.isclass(__import__("src.rag.service", fromlist=["RagService"]).RagService)

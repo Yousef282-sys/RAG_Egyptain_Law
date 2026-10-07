@@ -1,38 +1,38 @@
-"""FastAPI app exposing /health and /ask for the Arabic Legal RAG pipeline.
+"""FastAPI app: /health, /ask, /ask/stream for the Arabic Legal RAG pipeline.
 
-IMPORTANT SANDBOX NOTE: this module requires `fastapi`, `pydantic` (v2),
-and `uvicorn` to run, none of which are installed in this development
-sandbox (no network access here to install them). The code below is
-standard FastAPI/Pydantic v2 and is expected to run as-is once those
-packages are installed (see README) -- but it has NOT been executed or
-tested in this sandbox. tests/test_api.py documents this and skips
-(rather than fabricating a pass) when these imports are unavailable.
+Retrieval -> (vLLM-compatible) generation -> {answer, sources}; sources are
+keyed by legal ARTICLE NUMBER. All business logic lives in
+src/rag/service.py (shared with the BentoML service); this module is the
+thin HTTP layer.
+
+Requires fastapi / pydantic v2 / uvicorn. Those are NOT installed in the
+development sandbox, so this module has not been executed there --
+tests/test_api.py skips (never fakes a pass) when they are missing. The
+logic it delegates to (service/generation) IS unit-tested offline.
 
 Configuration (env vars, all optional):
   VECTOR_STORE_DIR    -- path to the built index (default: data/vector_store)
-  RAG_TOP_K           -- number of chunks to retrieve per question (default: 5)
+  RAG_TOP_K           -- chunks retrieved per question (default: 5)
   MAX_QUESTION_LENGTH -- max accepted question length, chars (default: 2000)
+  GENERATION_MODEL / VLLM_BASE_URL / VLLM_API_KEY / GENERATION_MAX_TOKENS /
+  GENERATION_TEMPERATURE / GENERATION_TIMEOUT_S -- vLLM backend, see
+  src/rag/generation.py. With GENERATION_MODEL unset the API runs in an
+  explicitly-labelled retrieval-only mode.
 
-Day 7 audit: RAG_TOP_K is validated at import time (fail fast on a bad
-value instead of misbehaving at request time), and /ask questions are
-rejected if unreasonably long. Both checks' actual logic lives in
-src/api/validation.py (no fastapi/pydantic import there), kept separate
-so it stays unit-testable in this sandbox without either package --
-see tests/test_api_validation.py.
-
-Day 8: every /ask request logs one structured, local event (request id,
-timestamp, latency, status, result count -- never the question text
-itself or retrieved article text) via src/observability/logger.py. See
-that module's ALLOWED_EVENT_FIELDS for the exact, enforced allowlist.
+Every request logs one structured local event (request id, latency,
+status, result count -- never question or article text), see
+src/observability/logger.py.
 """
 from __future__ import annotations
 
+import json
 import os
 import time
 import uuid
 from typing import List, Optional
 
 from fastapi import FastAPI, HTTPException
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, field_validator
 
 from src.api.validation import (
@@ -41,19 +41,22 @@ from src.api.validation import (
     validate_top_k,
 )
 from src.observability.logger import build_event, log_event, now_iso
+from src.rag.generation import GenerationError, get_generator
 from src.rag.retriever import Retriever
+from src.rag.service import RagService, index_info
 from src.rag.vector_store import DEFAULT_STORE_DIR
 
 VECTOR_STORE_DIR = os.environ.get("VECTOR_STORE_DIR", str(DEFAULT_STORE_DIR))
 MAX_QUESTION_LENGTH = int(os.environ.get("MAX_QUESTION_LENGTH", str(DEFAULT_MAX_QUESTION_LENGTH)))
 RAG_TOP_K = validate_top_k(os.environ.get("RAG_TOP_K", "5"))
 
-app = FastAPI(title="Arabic Legal RAG - Day 3 (retrieval-only)")
+app = FastAPI(title="Arabic Legal RAG")
 
-# Loaded once, lazily, on first request -- never rebuilt/reloaded per
-# request. A load failure (e.g. index not built yet) is cached as an
-# error and reported as a clean 503 on every subsequent request instead
-# of retrying (and instead of crashing the process).
+# Generator construction does not contact the model server.
+_generator = get_generator()
+
+# Loaded once, lazily, on first request. A load failure (e.g. index not
+# built yet) is cached and reported as a clean 503 instead of crashing.
 _retriever: Optional[Retriever] = None
 _retriever_load_error: Optional[str] = None
 
@@ -97,10 +100,32 @@ class AskResponse(BaseModel):
 
 @app.get("/health")
 def health() -> dict:
-    # Deliberately cheap/independent of the index so it reflects "the
-    # process is up", not "the index is loaded" -- Kubernetes-style
-    # liveness check. Index status is reported via the 503 path on /ask.
-    return {"status": "ok"}
+    # Cheap and independent of the vector index/model server: "process is
+    # up" plus index metadata read from the manifest. Never loads the
+    # embedder and never calls the generation backend.
+    return {
+        "status": "ok",
+        "generator": _generator.name,
+        "generation_is_llm": _generator.is_llm,
+        **index_info(VECTOR_STORE_DIR),
+    }
+
+
+def _log(request_id: str, start: float, route: str, status: str, **extra) -> None:
+    log_event(
+        build_event(
+            request_id=request_id,
+            timestamp=now_iso(),
+            route=route,
+            latency_ms=round((time.perf_counter() - start) * 1000, 2),
+            status=status,
+            **extra,
+        )
+    )
+
+
+def _service() -> RagService:
+    return RagService(get_retriever(), _generator)  # raises 503 if no index
 
 
 @app.post("/ask", response_model=AskResponse)
@@ -108,73 +133,63 @@ def ask(payload: AskRequest) -> AskResponse:
     request_id = str(uuid.uuid4())
     start = time.perf_counter()
 
-    def _latency_ms() -> float:
-        return round((time.perf_counter() - start) * 1000, 2)
-
     try:
-        retriever = get_retriever()  # raises HTTPException(503) if unavailable
+        service = _service()
     except HTTPException as exc:
-        log_event(
-            build_event(
-                request_id=request_id,
-                timestamp=now_iso(),
-                route="/ask",
-                latency_ms=_latency_ms(),
-                status=f"error_{exc.status_code}",
-                result_count=0,
-                error_type="RetrieverUnavailable",
-            )
-        )
+        _log(request_id, start, "/ask", f"error_{exc.status_code}",
+             result_count=0, error_type="RetrieverUnavailable")
         raise
 
     try:
-        results = retriever.retrieve(payload.question)
+        result = service.ask(payload.question)
+    except GenerationError as exc:
+        _log(request_id, start, "/ask", "error_502",
+             result_count=0, error_type="GenerationError")
+        raise HTTPException(status_code=502, detail=f"Generation backend error: {exc}")
     except Exception as exc:
-        log_event(
-            build_event(
-                request_id=request_id,
-                timestamp=now_iso(),
-                route="/ask",
-                latency_ms=_latency_ms(),
-                status="error_500",
-                result_count=0,
-                error_type=type(exc).__name__,
-            )
-        )
+        _log(request_id, start, "/ask", "error_500",
+             result_count=0, error_type=type(exc).__name__)
+        raise HTTPException(status_code=500, detail=f"Request failed: {exc}")
+
+    _log(request_id, start, "/ask", "ok",
+         result_count=len(result["sources"]), question_length=len(payload.question))
+    return AskResponse(**result)
+
+
+@app.post("/ask/stream")
+def ask_stream(payload: AskRequest) -> StreamingResponse:
+    """Server-sent events: one `sources` event, then `token` events as the
+    generation backend produces text, then `done` (or `error`).
+    """
+    request_id = str(uuid.uuid4())
+    start = time.perf_counter()
+
+    try:
+        events = _service().ask_stream(payload.question)
+        first = next(events)  # retrieval runs here -> real HTTP errors, pre-stream
+    except HTTPException as exc:
+        _log(request_id, start, "/ask/stream", f"error_{exc.status_code}",
+             result_count=0, error_type="RetrieverUnavailable")
+        raise
+    except Exception as exc:
+        _log(request_id, start, "/ask/stream", "error_500",
+             result_count=0, error_type=type(exc).__name__)
         raise HTTPException(status_code=500, detail=f"Retrieval failed: {exc}")
 
-    sources = [
-        Source(
-            article_number=r["article_number"],
-            citation=r["citation"] or "",
-            text=r["text_ar"] or r["text_en"] or "",
-        )
-        for r in results
-    ]
+    def _sse(event: dict) -> str:
+        return f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
 
-    if not sources:
-        answer = "No relevant articles were found for this question."
-    else:
-        top = sources[0]
-        # Development-only, retrieval-only answer. No generation model is
-        # configured, so this is explicitly NOT presented as an
-        # LLM-generated answer -- it only names the top retrieved article
-        # and points at the sources list.
-        answer = (
-            "[retrieval-only, no generation model configured] "
-            f"The most relevant provision found is {top.citation}. "
-            "See the sources list for the retrieved article text."
-        )
+    def _body():
+        yield _sse(first)
+        try:
+            for event in events:
+                yield _sse(event)
+        except GenerationError as exc:
+            _log(request_id, start, "/ask/stream", "error_502",
+                 result_count=len(first["sources"]), error_type="GenerationError")
+            yield _sse({"type": "error", "detail": f"Generation backend error: {exc}"})
+            return
+        _log(request_id, start, "/ask/stream", "ok",
+             result_count=len(first["sources"]), question_length=len(payload.question))
 
-    log_event(
-        build_event(
-            request_id=request_id,
-            timestamp=now_iso(),
-            route="/ask",
-            latency_ms=_latency_ms(),
-            status="ok",
-            result_count=len(sources),
-            question_length=len(payload.question),
-        )
-    )
-    return AskResponse(answer=answer, sources=sources)
+    return StreamingResponse(_body(), media_type="text/event-stream")
