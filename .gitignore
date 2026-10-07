@@ -1,0 +1,16 @@
+# Generated vector index (rebuildable from data/processed/civil_code.json)
+data/vector_store/*
+!data/vector_store/.gitkeep
+
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Raw source PDF (large, user-provided)
+data/raw/*.pdf
+
+# MLflow local tracking store (if/when mlflow runs locally)
+mlruns/
+mlartifacts/
+

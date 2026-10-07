@@ -1,0 +1,22 @@
+# Keep the build context small and avoid baking generated/large or
+# environment-specific artifacts into the image.
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Generated index -- mounted at runtime instead, see README.
+data/vector_store/
+
+# Large raw source PDF -- not needed at runtime (only data/processed/ is).
+data/raw/*.pdf
+
+# Reports, docs, git metadata -- not needed inside the image.
+reports/
+.git/
+.gitignore
+README.md
+PROGRESS.md
+
+# Local test artifacts
+tests/
+run_tests.py

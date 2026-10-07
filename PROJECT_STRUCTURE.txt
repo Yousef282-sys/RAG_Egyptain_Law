@@ -1,0 +1,102 @@
+arabic-legal-rag/
+├── .github/
+│   └── workflows/
+│       └── ci.yml
+├── data/
+│   ├── eval/
+│   │   └── retrieval_eval.json
+│   ├── processed/
+│   │   ├── .gitkeep
+│   │   └── civil_code.json
+│   ├── raw/
+│   │   ├── .gitkeep
+│   │   └── civil_code.pdf
+│   └── vector_store/
+│       └── manifest.json
+├── reports/
+│   ├── .gitkeep
+│   ├── PROJECT_HANDOVER.md
+│   ├── day1_spot_check.md
+│   ├── day4_experiment_results.json
+│   ├── day9_report.md
+│   └── requirement_matrix.md
+├── scripts/
+│   ├── check_corpus_quality.py
+│   └── ragas_gate.py
+├── src/
+│   ├── api/
+│   │   ├── __init__.py
+│   │   ├── main.py
+│   │   └── validation.py
+│   ├── experiments/
+│   │   ├── __init__.py
+│   │   ├── eval_set.py
+│   │   ├── evaluate.py
+│   │   ├── ragas_eval.py
+│   │   ├── run_experiments.py
+│   │   └── tracking.py
+│   ├── ingestion/
+│   │   ├── __init__.py
+│   │   ├── arabic_utils.py
+│   │   ├── bidi_fix.py
+│   │   ├── cli.py
+│   │   ├── parser.py
+│   │   ├── pdf_reader.py
+│   │   ├── schema.py
+│   │   └── validation.py
+│   ├── observability/
+│   │   ├── __init__.py
+│   │   ├── langfuse_adapter.py
+│   │   ├── logger.py
+│   │   └── monitoring.py
+│   ├── rag/
+│   │   ├── __init__.py
+│   │   ├── chunking.py
+│   │   ├── embeddings.py
+│   │   ├── retriever.py
+│   │   └── vector_store.py
+│   ├── serving/
+│   │   ├── __init__.py
+│   │   └── bento_service.py
+│   └── __init__.py
+├── tests/
+│   ├── load/
+│   │   └── locustfile.py
+│   ├── __init__.py
+│   ├── test_api.py
+│   ├── test_api_validation.py
+│   ├── test_arabic_utils.py
+│   ├── test_bentoml_service.py
+│   ├── test_bidi_fix.py
+│   ├── test_chunking.py
+│   ├── test_ci_workflow.py
+│   ├── test_docker_config.py
+│   ├── test_dvc_pipeline.py
+│   ├── test_embeddings.py
+│   ├── test_eval_set.py
+│   ├── test_evaluate.py
+│   ├── test_integration_pipeline.py
+│   ├── test_langfuse_adapter.py
+│   ├── test_load_locustfile.py
+│   ├── test_mlflow_tracking.py
+│   ├── test_observability_logger.py
+│   ├── test_observability_monitoring.py
+│   ├── test_parser.py
+│   ├── test_quality_gates.py
+│   ├── test_ragas_eval.py
+│   ├── test_retriever.py
+│   ├── test_run_experiments.py
+│   ├── test_validation.py
+│   └── test_vector_store.py
+├── .dockerignore
+├── .gitignore
+├── AI_CONTEXT.md
+├── Dockerfile
+├── PROGRESS.md
+├── README.md
+├── REMAINING_WORK.md
+├── WINDOWS_SETUP.md
+├── bentofile.yaml
+├── dvc.yaml
+├── pyproject.toml
+└── run_tests.py

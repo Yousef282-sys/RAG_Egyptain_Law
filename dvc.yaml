@@ -1,0 +1,40 @@
+# DVC pipeline: data/raw/civil_code.pdf -> data/processed/civil_code.json
+#
+# NOT RUN in this development sandbox: `dvc` is not installed and there is
+# no network access to install it (confirmed: `pip install dvc` -> "No
+# matching distribution found"). This file is a plain, hand-authored YAML
+# config -- DVC's pipeline format is just YAML, so writing it does not
+# require running dvc -- but `dvc repro`/`dvc status`/`dvc.lock` generation
+# were NOT executed. See PROGRESS.md for exactly what was and wasn't
+# verified, and README for the commands to run for real once DVC is
+# available.
+#
+# The stage command reuses the existing Day 1 ingestion CLI exactly as
+# documented in README ("Run ingestion") -- no new/second parser was
+# created for this pipeline.
+stages:
+  extract_corpus:
+    cmd: python -m src.ingestion.cli ingest --pdf data/raw/civil_code.pdf --out data/processed/civil_code.json
+    deps:
+      - data/raw/civil_code.pdf
+      - src/ingestion/cli.py
+      - src/ingestion/pdf_reader.py
+      - src/ingestion/bidi_fix.py
+      - src/ingestion/arabic_utils.py
+      - src/ingestion/parser.py
+      - src/ingestion/schema.py
+      - src/ingestion/validation.py
+    outs:
+      - data/processed/civil_code.json
+    # `run_ingest` (src/ingestion/cli.py) already runs validate_corpus and
+    # prints a WARNING to stderr on issues, but always returns exit code 0
+    # -- intentionally NOT wired as a hard pass/fail gate here. The
+    # corpus's `validate` command reports duplicate article numbers 1 and
+    # 2 as "not clean" (exit code 2), but that duplication is a real,
+    # documented, INTENTIONAL characteristic of the source document (the
+    # Promulgation Law's own front-matter articles vs. the Civil Code
+    # proper restarting numbering -- see reports/day1_spot_check.md), not
+    # a defect. Hard-gating the stage on `validate`'s exit code would make
+    # this pipeline fail on every single correct run. Validation output is
+    # still produced (the WARNING line above) for a human to read; it is
+    # reported, not blindly enforced.

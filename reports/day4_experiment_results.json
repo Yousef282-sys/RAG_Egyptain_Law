@@ -1,0 +1,116 @@
+{
+  "eval_set_size": 15,
+  "eval_set_path": "data/eval/retrieval_eval.json",
+  "results": [
+    {
+      "config": {
+        "run_name": "baseline",
+        "chunk_size": 1000,
+        "top_k": 5,
+        "tfidf_max_features": 4096,
+        "tfidf_ngram_range": "(1, 1)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedder_model": "tfidf-fallback (offline, lexical only -- not semantic)",
+        "backend": "simple-numpy"
+      },
+      "metrics": {
+        "hit_rate_at_5": 1.0,
+        "mean_reciprocal_rank": 0.9055555555555556,
+        "n_eval_questions": 15,
+        "chunk_count": 1107,
+        "build_seconds": 0.137,
+        "eval_seconds": 0.127
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    },
+    {
+      "config": {
+        "run_name": "smaller_chunks",
+        "chunk_size": 500,
+        "top_k": 5,
+        "tfidf_max_features": 4096,
+        "tfidf_ngram_range": "(1, 1)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedder_model": "tfidf-fallback (offline, lexical only -- not semantic)",
+        "backend": "simple-numpy"
+      },
+      "metrics": {
+        "hit_rate_at_5": 1.0,
+        "mean_reciprocal_rank": 0.9222222222222223,
+        "n_eval_questions": 15,
+        "chunk_count": 1343,
+        "build_seconds": 0.151,
+        "eval_seconds": 0.171
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    },
+    {
+      "config": {
+        "run_name": "larger_chunks",
+        "chunk_size": 2000,
+        "top_k": 5,
+        "tfidf_max_features": 4096,
+        "tfidf_ngram_range": "(1, 1)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedder_model": "tfidf-fallback (offline, lexical only -- not semantic)",
+        "backend": "simple-numpy"
+      },
+      "metrics": {
+        "hit_rate_at_5": 1.0,
+        "mean_reciprocal_rank": 0.9055555555555556,
+        "n_eval_questions": 15,
+        "chunk_count": 1095,
+        "build_seconds": 0.13,
+        "eval_seconds": 0.136
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    },
+    {
+      "config": {
+        "run_name": "smaller_top_k",
+        "chunk_size": 1000,
+        "top_k": 3,
+        "tfidf_max_features": 4096,
+        "tfidf_ngram_range": "(1, 1)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedder_model": "tfidf-fallback (offline, lexical only -- not semantic)",
+        "backend": "simple-numpy"
+      },
+      "metrics": {
+        "hit_rate_at_3": 0.9333333333333333,
+        "mean_reciprocal_rank": 0.888888888888889,
+        "n_eval_questions": 15,
+        "chunk_count": 1107,
+        "build_seconds": 0.131,
+        "eval_seconds": 0.135
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    },
+    {
+      "config": {
+        "run_name": "bigram_tfidf",
+        "chunk_size": 1000,
+        "top_k": 5,
+        "tfidf_max_features": 4096,
+        "tfidf_ngram_range": "(1, 2)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedder_model": "tfidf-fallback (offline, lexical only -- not semantic)",
+        "backend": "simple-numpy"
+      },
+      "metrics": {
+        "hit_rate_at_5": 1.0,
+        "mean_reciprocal_rank": 0.8055555555555556,
+        "n_eval_questions": 15,
+        "chunk_count": 1107,
+        "build_seconds": 0.27,
+        "eval_seconds": 0.137
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    }
+  ]
+}

@@ -1,0 +1,12 @@
+# Minimal BentoML build config. NOT tested in this sandbox (no `bentoml`
+# package here, no network to install it). See README "BentoML usage"
+# for the exact (untested) commands to build/serve this.
+service: "src.serving.bento_service:ArabicLegalRAGService"
+labels:
+  project: arabic-legal-rag
+include:
+  - "src/**/*.py"
+  - "data/processed/civil_code.json"
+python:
+  packages:
+    - "-e .[rag]"
