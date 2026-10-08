@@ -1,4 +1,4 @@
-"""Persistent vector store for the RAG pipeline.
+﻿"""Persistent vector store for the RAG pipeline.
 
 Backends (same on-disk directory, `data/vector_store/` by default; a
 `manifest.json` records which backend and embedder built the index):
@@ -29,6 +29,7 @@ from __future__ import annotations
 
 import hashlib
 import json
+import re
 import os
 from dataclasses import fields
 from pathlib import Path
@@ -61,7 +62,6 @@ def _chunk_text_for_embedding(chunk: Chunk) -> str:
     # Full article text (text_ar + text_en): the corpus fields are
     # interleaved, not language-pure -- see chunking.full_text.
     return chunk.full_text()
-
 
 def _make_manifest(
     backend: str, embedder, chunks: List[Chunk], build_info: Optional[Dict[str, Any]]
@@ -193,7 +193,7 @@ class ChromaVectorStore:
         for start in range(0, len(chunks), batch):
             part = chunks[start : start + batch]
             collection.upsert(
-                ids=[c.chunk_id for c in part],
+                ids=[f"{i}-{c.chunk_id}" for i, c in enumerate(part, start=start)],
                 embeddings=vectors[start : start + batch].tolist(),
                 documents=texts[start : start + batch],
                 metadatas=[
@@ -293,3 +293,8 @@ def build_index_from_json(
         },
     )
     return read_manifest(store_dir)
+
+
+
+
+
