@@ -29,13 +29,18 @@ api = [
 serving = ["bentoml>=1.2"]
 load = ["locust>=2.20"]
 # Day 4 extra. Also NOT installable in this sandbox (no network).
-experiments = ["mlflow>=2.10"]
+experiments = ["mlflow>=2.13,<3"]  # pyfunc code_paths + registry aliases (2.x API)
 
 # Day 6 extra: CI lint tool. NOT installable in this sandbox (no network).
 lint = ["ruff>=0.4"]
 # Day 7 extras. Also NOT installable in this sandbox (no network).
 dvc = ["dvc>=3.0"]
-ragas = ["ragas>=0.1", "datasets>=2.14"]
+ragas = [
+    "ragas>=0.2.6,<0.3",  # integration written for the 0.2.x API (EvaluationDataset, ResponseRelevancy, ...)
+    "datasets>=2.14",
+    "langchain-openai>=0.1",  # judge LLM client (OpenAI-compatible, e.g. vLLM)
+    "langchain-core>=0.2",
+]
 # Day 8 extra, added during the Day-10 portability audit (was previously
 # used in src/observability/langfuse_adapter.py without a declared extra
 # -- a real packaging gap, now fixed). NOT installable in this sandbox.

@@ -1,0 +1,162 @@
+{
+  "generated_at": "2026-10-08T11:20:47.270592+00:00",
+  "git_commit": "68aadf0db9c41e8b66b14433e83469fe1ef98413",
+  "eval_set_path": "data/eval/retrieval_eval.json",
+  "eval_set_size": 57,
+  "mlflow_available": false,
+  "ragas": "NOT RUN: `ragas` is not installed/importable (pip install -e '.[ragas]'); no generation backend: GENERATION_MODEL is unset (RAGAS scores a generated answer; the retrieval-only fallback is not evaluated); RAGAS_JUDGE_MODEL is not set (judge LLM); no judge endpoint/key: set RAGAS_JUDGE_BASE_URL or RAGAS_JUDGE_API_KEY/OPENAI_API_KEY",
+  "selection": {
+    "run_name": "tfidf_control_c1000",
+    "metric": "mrr_at_10",
+    "value": 0.7466861598440545,
+    "rule": "highest mrr_at_10 among 2 completed runs (faithfulness not available for every run)"
+  },
+  "registry": null,
+  "results": [
+    {
+      "config": {
+        "run_name": "tfidf_control_c1000",
+        "embedding_backend": "tfidf",
+        "embedding_model": "tfidf-fallback",
+        "chunk_size": 1000,
+        "overlap": 0,
+        "top_k": 5,
+        "tfidf_max_features": 4096,
+        "tfidf_ngram_range": "(1, 1)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedding_kind": "tfidf-lexical",
+        "vector_backend": "simple-numpy",
+        "corpus_sha256": "035a98861a2d456f7f3da73fdb5a1b451048b393aaf7768db7f8407ed29c8479",
+        "eval_set_size": 57,
+        "eval_set_sha256": "1d46ea57836620db643934b06d0f5fe577783a839be9e1a65ecce15d347e2425",
+        "generator": "retrieval-only",
+        "ragas_status": "not_run"
+      },
+      "status": "completed",
+      "metrics": {
+        "hit_rate_at_1": 0.6666666666666666,
+        "hit_rate_at_3": 0.7894736842105263,
+        "hit_rate_at_5": 0.8596491228070176,
+        "hit_rate_at_10": 0.8771929824561403,
+        "mean_reciprocal_rank": 0.7447368421052633,
+        "mrr_at_10": 0.7466861598440545,
+        "n_eval_questions": 57,
+        "chunk_count": 1107,
+        "build_seconds": 1.291,
+        "eval_seconds": 0.772
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    },
+    {
+      "config": {
+        "run_name": "tfidf_control_bigram_c500_o100",
+        "embedding_backend": "tfidf",
+        "embedding_model": "tfidf-fallback",
+        "chunk_size": 500,
+        "overlap": 100,
+        "top_k": 5,
+        "tfidf_max_features": 8192,
+        "tfidf_ngram_range": "(1, 2)",
+        "embedder_class": "TfidfFallbackEmbedder",
+        "embedding_kind": "tfidf-lexical",
+        "vector_backend": "simple-numpy",
+        "corpus_sha256": "035a98861a2d456f7f3da73fdb5a1b451048b393aaf7768db7f8407ed29c8479",
+        "eval_set_size": 57,
+        "eval_set_sha256": "1d46ea57836620db643934b06d0f5fe577783a839be9e1a65ecce15d347e2425",
+        "generator": "retrieval-only",
+        "ragas_status": "not_run"
+      },
+      "status": "completed",
+      "metrics": {
+        "hit_rate_at_1": 0.5964912280701754,
+        "hit_rate_at_3": 0.7719298245614035,
+        "hit_rate_at_5": 0.7894736842105263,
+        "hit_rate_at_10": 0.8421052631578947,
+        "mean_reciprocal_rank": 0.6818713450292397,
+        "mrr_at_10": 0.6890559732664996,
+        "n_eval_questions": 57,
+        "chunk_count": 1343,
+        "build_seconds": 0.657,
+        "eval_seconds": 1.544
+      },
+      "mlflow_logged": false,
+      "mlflow_run_id": null
+    },
+    {
+      "config": {
+        "run_name": "minilm_c1000_o0_k5",
+        "embedding_backend": "sentence-transformers",
+        "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "chunk_size": 1000,
+        "overlap": 0,
+        "top_k": 5
+      },
+      "status": "skipped",
+      "metrics": {},
+      "mlflow_logged": false,
+      "mlflow_run_id": null,
+      "reason": "embedding backend unavailable: sentence-transformers is not installed (pip install -e '.[rag]')"
+    },
+    {
+      "config": {
+        "run_name": "minilm_c500_o100_k5",
+        "embedding_backend": "sentence-transformers",
+        "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "chunk_size": 500,
+        "overlap": 100,
+        "top_k": 5
+      },
+      "status": "skipped",
+      "metrics": {},
+      "mlflow_logged": false,
+      "mlflow_run_id": null,
+      "reason": "embedding backend unavailable: sentence-transformers is not installed (pip install -e '.[rag]')"
+    },
+    {
+      "config": {
+        "run_name": "minilm_c1000_o0_k3",
+        "embedding_backend": "sentence-transformers",
+        "embedding_model": "sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2",
+        "chunk_size": 1000,
+        "overlap": 0,
+        "top_k": 3
+      },
+      "status": "skipped",
+      "metrics": {},
+      "mlflow_logged": false,
+      "mlflow_run_id": null,
+      "reason": "embedding backend unavailable: sentence-transformers is not installed (pip install -e '.[rag]')"
+    },
+    {
+      "config": {
+        "run_name": "e5small_c1000_o0_k5",
+        "embedding_backend": "sentence-transformers",
+        "embedding_model": "intfloat/multilingual-e5-small",
+        "chunk_size": 1000,
+        "overlap": 0,
+        "top_k": 5
+      },
+      "status": "skipped",
+      "metrics": {},
+      "mlflow_logged": false,
+      "mlflow_run_id": null,
+      "reason": "embedding backend unavailable: sentence-transformers is not installed (pip install -e '.[rag]')"
+    },
+    {
+      "config": {
+        "run_name": "e5small_c500_o100_k5",
+        "embedding_backend": "sentence-transformers",
+        "embedding_model": "intfloat/multilingual-e5-small",
+        "chunk_size": 500,
+        "overlap": 100,
+        "top_k": 5
+      },
+      "status": "skipped",
+      "metrics": {},
+      "mlflow_logged": false,
+      "mlflow_run_id": null,
+      "reason": "embedding backend unavailable: sentence-transformers is not installed (pip install -e '.[rag]')"
+    }
+  ]
+}

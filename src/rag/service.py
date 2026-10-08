@@ -11,6 +11,7 @@ import json
 from pathlib import Path
 from typing import Any, Dict, Iterator, List, Optional
 
+from .chunking import full_text
 from .generation import Generator, get_generator
 
 
@@ -19,7 +20,7 @@ def to_sources(results: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
         {
             "article_number": r["article_number"],
             "citation": r.get("citation") or "",
-            "text": r.get("text_ar") or r.get("text_en") or "",
+            "text": full_text(r.get("text_ar"), r.get("text_en")),
         }
         for r in results
     ]
@@ -37,14 +38,17 @@ def index_info(store_dir: str | Path) -> Dict[str, Any]:
             m = json.load(f)
     except (OSError, ValueError):
         return {"index_available": False, "index_error": "unreadable manifest"}
-    embedder_class = m.get("embedder_class", "unknown")
+    kind = m.get("embedding_kind")  # absent in pre-Phase-2 manifests
+    if kind is None:
+        kind = "tfidf-lexical" if m.get("embedder_class") == "TfidfFallbackEmbedder" else "semantic"
     return {
         "index_available": True,
         "vector_backend": m.get("backend"),
         "chunk_count": m.get("chunk_count"),
         "embedder_model": m.get("embedder_model"),
+        "embedding_kind": kind,
         # False => lexical TF-IDF fallback index, NOT semantic embeddings.
-        "semantic_embeddings": embedder_class != "TfidfFallbackEmbedder",
+        "semantic_embeddings": kind == "semantic",
     }
 
 

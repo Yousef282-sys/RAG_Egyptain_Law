@@ -38,10 +38,12 @@ class FailingStreamGen(TokenGen):
         raise GenerationError("down")
 
 
-def test_to_sources_uses_article_numbers_and_text_fallback():
+def test_to_sources_uses_article_numbers_and_full_article_text():
+    # Phase 2: text is text_ar + text_en (the corpus fields are interleaved,
+    # not language-pure), never just one of them.
     s = to_sources(FakeRetriever().retrieve("q"))
     assert [x["article_number"] for x in s] == [147, 1022]
-    assert s[0]["text"] == "نص عربي" and s[1]["text"] == "english only"
+    assert s[0]["text"] == "نص عربي en" and s[1]["text"] == "english only"
     assert s[1]["citation"] == ""
     assert all(set(x) == {"article_number", "citation", "text"} for x in s)  # no chunk ids/pages
 

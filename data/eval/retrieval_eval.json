@@ -1,77 +1,686 @@
 [
   {
-    "question": "The debtor shall, if he changes his domicile,",
-    "expected_article_number": 254,
-    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section III الفصل الثالث - المادة 254"
+    "id": "q001",
+    "language": "en",
+    "question": "How are periods of limitation calculated, unless a law expressly provides otherwise?",
+    "expected_article_number": 3,
+    "expected_article_numbers": [
+      3
+    ],
+    "citation": "SECTION I الفصل األول - المادة 3",
+    "reference": "Periods of limitation will be calculated according to the Gregorian calendar, unless expressly provided otherwise by a law.",
+    "reference_source": "corpus: Latin-script text of article 3"
   },
   {
-    "question": "A person whose rights inherent in his personality",
+    "id": "q002",
+    "language": "en",
+    "question": "What names must every person have, and to whom is the family name passed?",
+    "expected_article_number": 38,
+    "expected_article_numbers": [
+      38
+    ],
+    "citation": "SECTION II الفصل الثاني - المادة 38",
+    "reference": "Every person must have a first name and a family name. The family name of a person is bestowed upon his children.",
+    "reference_source": "corpus: Latin-script text of article 38"
+  },
+  {
+    "id": "q003",
+    "language": "en",
+    "question": "What can a person demand when rights inherent in his personality have been unlawfully infringed?",
     "expected_article_number": 50,
-    "citation": "SECTION II الفصل الثاني - المادة 50"
+    "expected_article_numbers": [
+      50
+    ],
+    "citation": "SECTION II الفصل الثاني - المادة 50",
+    "reference": "A person whose rights inherent in his personality have been unlawfully infringed, shall have the right to demand the cessation of the infringement and compensation for any damage sustained thereby.",
+    "reference_source": "corpus: Latin-script text of article 50"
   },
   {
-    "question": "An outgoing lessee shall do nothing of a",
-    "expected_article_number": 618,
-    "citation": "BOOK II الكتاب الثاني - Chapter II الباب الثاني - Section I الفصل األول - المادة 618"
+    "id": "q004",
+    "language": "en",
+    "question": "What are fungible things under the Civil Code?",
+    "expected_article_number": 85,
+    "expected_article_numbers": [
+      85
+    ],
+    "citation": "SECTION III الفصل الثالث - المادة 85",
+    "reference": "Fungibles are those things which can be replaced one by another in a payment and which it is customary in trade to estimate by number, measure, volume or weight.",
+    "reference_source": "corpus: Latin-script text of article 85"
   },
   {
-    "question": "A compromise cannot be impugned on the ground",
-    "expected_article_number": 556,
-    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section VI الفصل السادس - المادة 556"
+    "id": "q005",
+    "language": "en",
+    "question": "What is the legal effect of an acceptance that goes beyond the offer or is accompanied by a restriction or modification?",
+    "expected_article_number": 96,
+    "expected_article_numbers": [
+      96
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 96",
+    "reference": "An acceptance that goes beyond the offer, or that is accompanied by a restriction or modification, is deemed to be a rejection comprising a new offer.",
+    "reference_source": "corpus: Latin-script text of article 96"
   },
   {
-    "question": "If the contribution of a partner consists of",
-    "expected_article_number": 512,
-    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section IV الفصل الرابع - المادة 512"
+    "id": "q006",
+    "language": "en",
+    "question": "In whose favor are the rights and obligations when a representative concludes a contract within the limits of his authority in the name of his principal?",
+    "expected_article_number": 105,
+    "expected_article_numbers": [
+      105
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 105",
+    "reference": "When a contract is concluded by a representative within the limits of his authority in the name of his principal, the rights and obligations resulting therefrom will be in favor of and binding upon the principal.",
+    "reference_source": "corpus: Latin-script text of article 105"
   },
   {
-    "question": "An assignor is responsible for his personal acts,",
-    "expected_article_number": 311,
-    "citation": "BOOK I الكتاب األول - Chapter IV الباب الرابع - Section I الفصل األول - المادة 311"
+    "id": "q007",
+    "language": "en",
+    "question": "In what circumstances may a party to a contract demand its avoidance for an essential mistake?",
+    "expected_article_number": 120,
+    "expected_article_numbers": [
+      120
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 120",
+    "reference": "A party to a contract may demand the avoidance of the contract if he committed an essential mistake, if the other party committed the same mistake or had knowledge thereof, or could have easily detected the mistake.",
+    "reference_source": "corpus: Latin-script text of article 120"
   },
   {
-    "question": "Every creditor, even if his claim has not",
-    "expected_article_number": 235,
-    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section III الفصل الثالث - المادة 235"
+    "id": "q008",
+    "language": "en",
+    "question": "When is a contract void because of the consideration for an obligation?",
+    "expected_article_number": 136,
+    "expected_article_numbers": [
+      136
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 136",
+    "reference": "A contract is void when an obligation is assumed without consideration or for a consideration contrary to public policy or morality.",
+    "reference_source": "corpus: Latin-script text of article 136"
   },
   {
-    "question": "Subject to the rules with regard to transcription,",
-    "expected_article_number": 204,
-    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section I الفصل األول - المادة 204"
+    "id": "q009",
+    "language": "en",
+    "question": "What happens when only part of a contract is void or voidable?",
+    "expected_article_number": 143,
+    "expected_article_numbers": [
+      143
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 143",
+    "reference": "When part of a contract is void or voidable, that part alone will be annulled, unless it is established that the contract would not have been entered into without such a part, in which case the contract will be void as a whole.",
+    "reference_source": "corpus: Latin-script text of article 143"
   },
   {
-    "question": "Land uncovered by the sea belongs to the",
-    "expected_article_number": 919,
-    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - Section II الفصل الثاني - المادة 919"
+    "id": "q010",
+    "language": "en",
+    "question": "What happens to the correlative obligations when an obligation under a bilateral contract is extinguished by impossibility of performance?",
+    "expected_article_number": 159,
+    "expected_article_numbers": [
+      159
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 159",
+    "reference": "When an obligation arising out of a bilateral contract is extinguished by reason of impossibility of performance, correlative obligations are also extinguished and the contract is rescinded ipso facto.",
+    "reference_source": "corpus: Latin-script text of article 159"
   },
   {
-    "question": "A declaration of intention becomes effective from the",
-    "expected_article_number": 91,
-    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 91"
+    "id": "q011",
+    "language": "en",
+    "question": "What is a person responsible for who causes injury to another in order to avoid a greater injury threatening himself or a third party?",
+    "expected_article_number": 168,
+    "expected_article_numbers": [
+      168
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - SECTION III الفصل الثالث - المادة 168",
+    "reference": "A person who causes injury to another person, in order to avoid greater injury that threatens him or a third party, is only responsible for such damages as the judge deems equitable.",
+    "reference_source": "corpus: Latin-script text of article 168"
   },
   {
-    "question": "Immovable and movable property owned by the State",
-    "expected_article_number": 87,
-    "citation": "SECTION III الفصل الثالث - المادة 87"
+    "id": "q012",
+    "language": "en",
+    "question": "When may a payment that was not due be recovered?",
+    "expected_article_number": 182,
+    "expected_article_numbers": [
+      182
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section IV . الفصل الرابع - المادة 182",
+    "reference": "A payment which was not due may be recovered, if it was made in the performance of an obligation whose cause had not materialized or had ceased to exist.",
+    "reference_source": "corpus: Latin-script text of article 182"
   },
   {
-    "question": "The debtor may by agreement accept liability for",
-    "expected_article_number": 217,
-    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section II الفصل الثانى - المادة 217"
+    "id": "q013",
+    "language": "en",
+    "question": "Can a debtor claim restitution of what he voluntarily gave to discharge a natural obligation?",
+    "expected_article_number": 201,
+    "expected_article_numbers": [
+      201
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - المادة 201",
+    "reference": "A debtor cannot claim restitution of that which he has voluntarily given to another with the object of discharging a natural obligation.",
+    "reference_source": "corpus: Latin-script text of article 201"
   },
   {
-    "question": "An application for the revocation of a gift",
-    "expected_article_number": 502,
-    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section III الفصل الثالث - المادة 502"
+    "id": "q014",
+    "language": "en",
+    "question": "May the judge reduce damages if the creditor, by his own fault, contributed to the loss?",
+    "expected_article_number": 216,
+    "expected_article_numbers": [
+      216
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section II الفصل الثانى - المادة 216",
+    "reference": "The judge may reduce the amount of damages or may even refuse to allow damages if the creditor, by his own fault, has contributed to the cause of, or increased, the loss.",
+    "reference_source": "corpus: Latin-script text of article 216"
   },
   {
-    "question": "A partner may apply to the Court for",
-    "expected_article_number": 531,
-    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section IV الفصل الرابع - المادة 531"
+    "id": "q015",
+    "language": "en",
+    "question": "Is solidarity between creditors or between debtors presumed, and how is it created?",
+    "expected_article_number": 279,
+    "expected_article_numbers": [
+      279
+    ],
+    "citation": "BOOK I الكتاب األول - Chapter III الباب الثالث - Section III الفصل الثالث - المادة 279",
+    "reference": "Solidarity between creditors or between debtors is not presumed. It is created by agreement or by law.",
+    "reference_source": "corpus: Latin-script text of article 279"
   },
   {
-    "question": "order for a judgment charge at the foot",
-    "expected_article_number": 1090,
-    "citation": "BOOK IV الكتاب الرابع - Chapter II الباب الثاني - Section I الفصل األول - المادة 1090"
+    "id": "q016",
+    "language": "en",
+    "question": "Can a creditor be forced to accept something other than the very thing due, even if its value is equal or greater?",
+    "expected_article_number": 341,
+    "expected_article_numbers": [
+      341
+    ],
+    "citation": "BOOK I الكتاب األول - Chapter V الباب الخامس - Section I الفصل األول - المادة 341",
+    "reference": "Payment must be made with the very thing due. The creditor cannot be forced to accept anything else, even if the value of such other thing is equal or greater.",
+    "reference_source": "corpus: Latin-script text of article 341"
+  },
+  {
+    "id": "q017",
+    "language": "en",
+    "question": "How are obligations extinguished by a voluntary release of the debtor, and when is the release completed?",
+    "expected_article_number": 371,
+    "expected_article_numbers": [
+      371
+    ],
+    "citation": "BOOK I الكتاب األول - Chapter V الباب الخامس - Section III الفصل الثالث - المادة 371",
+    "reference": "Obligations are extinguished by a voluntary release of a debtor by his creditor. The release is completed as soon as it comes to the knowledge of the debtor, but becomes void if refused by him.",
+    "reference_source": "corpus: Latin-script text of article 371"
+  },
+  {
+    "id": "q018",
+    "language": "en",
+    "question": "In what state is the vendor bound to deliver the thing sold to the purchaser?",
+    "expected_article_number": 431,
+    "expected_article_numbers": [
+      431
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section I الفصل األول - المادة 431",
+    "reference": "The vendor is bound to deliver the thing sold to the purchaser in the state in which it was at the time of the sale.",
+    "reference_source": "corpus: Latin-script text of article 431"
+  },
+  {
+    "id": "q019",
+    "language": "en",
+    "question": "What happens if the thing sold perishes before delivery because of a cause beyond the vendor's control?",
+    "expected_article_number": 437,
+    "expected_article_numbers": [
+      437
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section I الفصل األول - المادة 437",
+    "reference": "If the thing sold perishes before delivery as a result of a cause beyond the control of the vendor, the sale shall be dissolved and the price refunded to the purchaser, unless he was summoned to take delivery before the loss.",
+    "reference_source": "corpus: Latin-script text of article 437"
+  },
+  {
+    "id": "q020",
+    "language": "en",
+    "question": "How does the Civil Code define exchange?",
+    "expected_article_number": 482,
+    "expected_article_numbers": [
+      482
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section II الفصل الثاني - المادة 482",
+    "reference": "Exchange is a contract by which the contracting parties mutually bind themselves to transfer to the other by way of exchange the ownership of a thing other than money.",
+    "reference_source": "corpus: Latin-script text of article 482"
+  },
+  {
+    "id": "q021",
+    "language": "en",
+    "question": "What is a compromise under the Civil Code?",
+    "expected_article_number": 549,
+    "expected_article_numbers": [
+      549
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section VI الفصل السادس - المادة 549",
+    "reference": "Compromise is a contract by which two parties put an end to a dispute that has arisen, or prevent a dispute that is expected to arise, by the mutual surrender of part or their respective claims.",
+    "reference_source": "corpus: Latin-script text of article 549"
+  },
+  {
+    "id": "q022",
+    "language": "en",
+    "question": "What must a lessee do about matters that require the lessor's intervention, such as urgent repairs or defects?",
+    "expected_article_number": 585,
+    "expected_article_numbers": [
+      585
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter II الباب الثاني - Section I الفصل األول - المادة 585",
+    "reference": "The lessee must forthwith notify the lessor of all matters that require his intervention, such as urgent repairs, the discovery of defects, encroachments and disturbances or damage by third parties to the leased property.",
+    "reference_source": "corpus: Latin-script text of article 585"
+  },
+  {
+    "id": "q023",
+    "language": "en",
+    "question": "Who remains guarantor for the performance of the assignee's obligations when a lease is assigned?",
+    "expected_article_number": 595,
+    "expected_article_numbers": [
+      595
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter II الباب الثاني - Section I الفصل األول - المادة 595",
+    "reference": "When a lease is assigned, the principal lessee remains the guarantor for the performance of the assignee's obligations.",
+    "reference_source": "corpus: Latin-script text of article 595"
+  },
+  {
+    "id": "q024",
+    "language": "en",
+    "question": "What happens to a contract for works if performance of the work becomes impossible?",
+    "expected_article_number": 664,
+    "expected_article_numbers": [
+      664
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter III الباب الثالث العقود - Section I الفصل األول - المادة 664",
+    "reference": "A contract for works comes to an end if the performance of the work for which the contract was concluded becomes impossible.",
+    "reference_source": "corpus: Latin-script text of article 664"
+  },
+  {
+    "id": "q025",
+    "language": "en",
+    "question": "When is the performance of services presumed to be made for remuneration?",
+    "expected_article_number": 681,
+    "expected_article_numbers": [
+      681
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter III الباب الثالث العقود - Section II الفصل الثاني - المادة 681",
+    "reference": "The performance of services is presumed to be made for remuneration, if it is not customary for such services to be performed gratuitously or if such services come within the scope of the profession of the person who performs them.",
+    "reference_source": "corpus: Latin-script text of article 681"
+  },
+  {
+    "id": "q026",
+    "language": "en",
+    "question": "How can suretyship be established, even if the principal obligation can be proved by oral evidence?",
+    "expected_article_number": 773,
+    "expected_article_numbers": [
+      773
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter V الباب الخامس - Section I الفصل األول - المادة 773",
+    "reference": "Suretyship can only be established by writing, even if the principal obligation can be established by oral evidence.",
+    "reference_source": "corpus: Latin-script text of article 773"
+  },
+  {
+    "id": "q027",
+    "language": "en",
+    "question": "Who acquires ownership of a movable that has no owner?",
+    "expected_article_number": 870,
+    "expected_article_numbers": [
+      870
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - Section II الفصل الثاني - المادة 870",
+    "reference": "Whoever takes possession of a movable which has no owner, with the intention of its appropriation, acquires the ownership thereof.",
+    "reference_source": "corpus: Latin-script text of article 870"
+  },
+  {
+    "id": "q028",
+    "language": "en",
+    "question": "What is presumed about the possessor of a right?",
+    "expected_article_number": 964,
+    "expected_article_numbers": [
+      964
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - Section II الفصل الثاني - المادة 964",
+    "reference": "The possessor of a right is presumed, until the contrary is proved, to be its rightful possessor.",
+    "reference_source": "corpus: Latin-script text of article 964"
+  },
+  {
+    "id": "q029",
+    "language": "ar",
+    "question": "ما القانون الذي يحكم الالتزام بالنفقة بين الأقارب؟",
+    "expected_article_number": 15,
+    "expected_article_numbers": [
+      15
+    ],
+    "citation": "SECTION I الفصل األول - المادة 15",
+    "reference": "Obligations as regards payment of alimony to relatives are governed by the (national) law of the person liable for such payment.",
+    "reference_source": "corpus: Latin-script text of article 15"
+  },
+  {
+    "id": "q030",
+    "language": "ar",
+    "question": "ما الأحكام التي تسري على المفقود والغائب؟",
+    "expected_article_number": 32,
+    "expected_article_numbers": [
+      32
+    ],
+    "citation": "SECTION II الفصل الثاني - المادة 32",
+    "reference": "Missing person and absent persons are subject to provisions contained in special laws; in the absence of such special laws, Moslem law will be applied.",
+    "reference_source": "corpus: Latin-script text of article 32"
+  },
+  {
+    "id": "q031",
+    "language": "ar",
+    "question": "من يملك توقيع الحجر على المجنون والسفيه ورفعه عنهما؟",
+    "expected_article_number": 113,
+    "expected_article_numbers": [
+      113
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section I الفصل األول - المادة 113",
+    "reference": "The courts shall pronounce or raise interdictions on all persons suffering from insanity, mental derangement or imbecility, and prodigals, in accordance with the rules and the procedure prescribed by law.",
+    "reference_source": "corpus: Latin-script text of article 113"
+  },
+  {
+    "id": "q032",
+    "language": "ar",
+    "question": "متى تسري قواعد الوكالة على الفضالة؟",
+    "expected_article_number": 190,
+    "expected_article_numbers": [
+      190
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER I الباب األول - Section IV . الفصل الرابع - المادة 190",
+    "reference": "The rules of mandate apply, if the person for whom the voluntary agent acts ratifies his act.",
+    "reference_source": "corpus: Latin-script text of article 190"
+  },
+  {
+    "id": "q033",
+    "language": "ar",
+    "question": "ماذا يتضمن الالتزام بنقل حق عيني؟",
+    "expected_article_number": 206,
+    "expected_article_numbers": [
+      206
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section I الفصل األول - المادة 206",
+    "reference": "An obligation to transfer a real right includes that of the delivery of the article and of the preservation thereof up to the time of delivery.",
+    "reference_source": "corpus: Latin-script text of article 206"
+  },
+  {
+    "id": "q034",
+    "language": "ar",
+    "question": "هل يجوز للدائن المطالبة بتعويض يزيد على المبلغ المحدد في العقد عندما تتجاوز الخسارة هذا المبلغ؟",
+    "expected_article_number": 225,
+    "expected_article_numbers": [
+      225
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section II الفصل الثانى - المادة 225",
+    "reference": "When the loss exceeds the amount fixed by the contract, the creditor cannot claim an increased sum, unless he is able to prove that the debtor has been guilty of fraud or gross negligence.",
+    "reference_source": "corpus: Latin-script text of article 225"
+  },
+  {
+    "id": "q035",
+    "language": "ar",
+    "question": "متى تنتهي حالة الإعسار من تلقاء نفسها؟",
+    "expected_article_number": 262,
+    "expected_article_numbers": [
+      262
+    ],
+    "citation": "BOOK I الكتاب األول - CHAPTER II الباب الثاني - Section III الفصل الثالث - المادة 262",
+    "reference": "A state of insolvency automatically ceases upon the expiration of five years from the date on which the registration of the judgment declaring the insolvency was issued.",
+    "reference_source": "corpus: Latin-script text of article 262"
+  },
+  {
+    "id": "q036",
+    "language": "ar",
+    "question": "ما الذي تشمله حوالة الحق؟",
+    "expected_article_number": 307,
+    "expected_article_numbers": [
+      307
+    ],
+    "citation": "BOOK I الكتاب األول - Chapter IV الباب الرابع - Section I الفصل األول - المادة 307",
+    "reference": "The assignment of a right comprises its warranties such as securities, privileges and mortgages, as well as interest and installments that have fallen due.",
+    "reference_source": "corpus: Latin-script text of article 307"
+  },
+  {
+    "id": "q037",
+    "language": "ar",
+    "question": "كيف تتم حوالة الدين؟",
+    "expected_article_number": 315,
+    "expected_article_numbers": [
+      315
+    ],
+    "citation": "BOOK I الكتاب األول - Chapter IV الباب الرابع - Section II الفصل الثاني - المادة 315",
+    "reference": "An assignment of debt is effected by an agreement between the debtor and a third party who undertakes to assume the debt in the place of the debtor.",
+    "reference_source": "corpus: Latin-script text of article 315"
+  },
+  {
+    "id": "q038",
+    "language": "ar",
+    "question": "هل يوجد ضمان للعيوب في البيع القضائي أو البيع الإداري بالمزاد؟",
+    "expected_article_number": 454,
+    "expected_article_numbers": [
+      454
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section I الفصل األول - المادة 454",
+    "reference": "No warranty exists against defects in the case of a judicial sale or administrative sale by auction.",
+    "reference_source": "corpus: Latin-script text of article 454"
+  },
+  {
+    "id": "q039",
+    "language": "ar",
+    "question": "ما مدى ضمان من يبيع تركة دون بيان تفاصيل محتوياتها؟",
+    "expected_article_number": 473,
+    "expected_article_numbers": [
+      473
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section I الفصل األول - المادة 473",
+    "reference": "A person who sells an inheritance without giving particulars thereof, only warrants that he is an heir, unless otherwise agreed.",
+    "reference_source": "corpus: Latin-script text of article 473"
+  },
+  {
+    "id": "q040",
+    "language": "ar",
+    "question": "ما الأحكام التي تسري على هبة شيء معين بالذات لا يملكه الواهب؟",
+    "expected_article_number": 491,
+    "expected_article_numbers": [
+      491
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section III الفصل الثالث - المادة 491",
+    "reference": "If the gift is of a definite and specific thing which does not belong to the donor, it is governed by the provisions of Articles 466 and 467.",
+    "reference_source": "corpus: Latin-script text of article 491"
+  },
+  {
+    "id": "q041",
+    "language": "ar",
+    "question": "ما حدود التزام الموهوب له بتنفيذ العوض إذا تبين أن قيمة الهبة أقل من قيمة العوض المشروط؟",
+    "expected_article_number": 498,
+    "expected_article_numbers": [
+      498
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section III الفصل الثالث - المادة 498",
+    "reference": "If it appears that the value of the gift is less than that of the consideration imposed, the donee shall only be liable to perform the consideration to the extent of the value of the thing donated.",
+    "reference_source": "corpus: Latin-script text of article 498"
+  },
+  {
+    "id": "q042",
+    "language": "ar",
+    "question": "ماذا يحدث لسلطات المديرين وللشخصية الاعتبارية للشركة عند حلها؟",
+    "expected_article_number": 533,
+    "expected_article_numbers": [
+      533
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter I الباب األول - Section IV الفصل الرابع - المادة 533",
+    "reference": "The powers of the managers shall cease upon the dissolution of the partnership, but the juristic personality of the partnership shall continue, in so far as necessary, for and up to the end of liquidation.",
+    "reference_source": "corpus: Latin-script text of article 533"
+  },
+  {
+    "id": "q043",
+    "language": "ar",
+    "question": "ما أثر الاتفاق على استبعاد ضمان التعرض أو العيوب أو الحد منه إذا أخفى المؤجر سببه غشا؟",
+    "expected_article_number": 578,
+    "expected_article_numbers": [
+      578
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter II الباب الثاني - Section I الفصل األول - المادة 578",
+    "reference": "Any agreement excluding or limiting the warranty against disturbance or defects is void if the lessor has fraudulently hidden the cause of such warranty.",
+    "reference_source": "corpus: Latin-script text of article 578"
+  },
+  {
+    "id": "q044",
+    "language": "ar",
+    "question": "ما مدة المزارعة إذا لم تحدد لها مدة؟",
+    "expected_article_number": 621,
+    "expected_article_numbers": [
+      621
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter II الباب الثاني - Section I الفصل األول - المادة 621",
+    "reference": "The amodiation is, when no term is fixed, deemed to have been granted for one yearly rotation of crops.",
+    "reference_source": "corpus: Latin-script text of article 621"
+  },
+  {
+    "id": "q045",
+    "language": "ar",
+    "question": "هل تنتهي المزارعة بوفاة المؤجر أو بوفاة المستأجر؟",
+    "expected_article_number": 626,
+    "expected_article_numbers": [
+      626
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter II الباب الثاني - Section I الفصل األول - المادة 626",
+    "reference": "The amodiation does not determine on the death of the lessor, but determines on the death of the lessee.",
+    "reference_source": "corpus: Latin-script text of article 626"
+  },
+  {
+    "id": "q046",
+    "language": "ar",
+    "question": "هل يجوز للمودع عنده أن يعين شخصا آخر لحفظ الشيء المودع دون إذن المودع؟",
+    "expected_article_number": 721,
+    "expected_article_numbers": [
+      721
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter III الباب الثالث العقود - Section IV الفصل الرابع - المادة 721",
+    "reference": "The depository may not, without the express authority of the depositor, appoint a substitute to take over the custody of the thing deposited, unless he is compelled to do so by reason of urgent and absolute necessity.",
+    "reference_source": "corpus: Latin-script text of article 721"
+  },
+  {
+    "id": "q047",
+    "language": "ar",
+    "question": "متى يعتبر عقد الوديعة قرضا؟",
+    "expected_article_number": 726,
+    "expected_article_numbers": [
+      726
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter III الباب الثالث العقود - Section IV الفصل الرابع - المادة 726",
+    "reference": "When the object of the deposit is a sum of money or another thing of a consumable nature and the depository has been authorized to make use of it, the contract is deemed to be a contract of loan for consumption.",
+    "reference_source": "corpus: Latin-script text of article 726"
+  },
+  {
+    "id": "q048",
+    "language": "ar",
+    "question": "متى يصح اشتراط عدم قابلية الإيراد المرتب مدى الحياة للحجز؟",
+    "expected_article_number": 744,
+    "expected_article_numbers": [
+      744
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter IV الباب الرابع - Section II الفصل الثاني - المادة 744",
+    "reference": "A stipulation in the contract that a life annuity is not attachable is only valid when the life annuity is settled gratuitously.",
+    "reference_source": "corpus: Latin-script text of article 744"
+  },
+  {
+    "id": "q049",
+    "language": "ar",
+    "question": "إلى أي مدى يلتزم المؤمن بتعويض المؤمن له؟",
+    "expected_article_number": 751,
+    "expected_article_numbers": [
+      751
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter IV الباب الرابع - Section III الفصل الثالث - المادة 751",
+    "reference": "The insurer shall only be bound to indemnify the assured for the actual loss arising as a result of the occurrence of the risk insured against, to the extent of the amount insured.",
+    "reference_source": "corpus: Latin-script text of article 751"
+  },
+  {
+    "id": "q050",
+    "language": "ar",
+    "question": "هل يضمن المؤمن الأضرار الناشئة عن الحريق إذا نشب بسبب عيب في الشيء المؤمن عليه؟",
+    "expected_article_number": 767,
+    "expected_article_numbers": [
+      767
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter IV الباب الرابع - Section III الفصل الثالث - المادة 767",
+    "reference": "An insurer guarantees compensation for all damage resulting from fire, even if the fire broke out owing to a defect in the thing insured.",
+    "reference_source": "corpus: Latin-script text of article 767"
+  },
+  {
+    "id": "q051",
+    "language": "ar",
+    "question": "ما أثر قبول الدائن شيئا آخر وفاء للدين على ذمة الكفيل؟",
+    "expected_article_number": 783,
+    "expected_article_numbers": [
+      783
+    ],
+    "citation": "BOOK II الكتاب الثاني - Chapter V الباب الخامس - Section II. الفصل الثاني - المادة 783",
+    "reference": "When the creditor has accepted a thing of another kind in payment of the debt, the surety is discharged, even if the thing given in payment is revendicated.",
+    "reference_source": "corpus: Latin-script text of article 783"
+  },
+  {
+    "id": "q052",
+    "language": "ar",
+    "question": "ما حق المالك في إلزام جيرانه بوضع علامات الحدود، وكيف تقسم نفقات ذلك؟",
+    "expected_article_number": 813,
+    "expected_article_numbers": [
+      813
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - المادة 813",
+    "reference": "Every owner has the right to compel his neighbors to place boundary marks along the boundaries of their adjoining properties. The cost of such delimitation will be shared between them.",
+    "reference_source": "corpus: Latin-script text of article 813"
+  },
+  {
+    "id": "q053",
+    "language": "ar",
+    "question": "هل يجوز لأحد الشركاء في الشيوع اتخاذ إجراءات حفظ المال الشائع دون موافقة الباقين؟",
+    "expected_article_number": 830,
+    "expected_article_numbers": [
+      830
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - المادة 830",
+    "reference": "Every co-owner may also, even without the consent of the other co-owners, take necessary measures for the preservation of the property in common.",
+    "reference_source": "corpus: Latin-script text of article 830"
+  },
+  {
+    "id": "q054",
+    "language": "ar",
+    "question": "لمن تكون ملكية المنشآت الخفيفة التي تقام على أرض الغير دون قصد بقائها بصفة دائمة؟",
+    "expected_article_number": 929,
+    "expected_article_numbers": [
+      929
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - Section II الفصل الثاني - المادة 929",
+    "reference": "Light constructions, such as sheds, shops and shelters, erected on the land of another, which are not intended to be maintained permanently, shall be the property of the person who erected them.",
+    "reference_source": "corpus: Latin-script text of article 929"
+  },
+  {
+    "id": "q055",
+    "language": "ar",
+    "question": "كيف يكتسب عديم التمييز الحيازة؟",
+    "expected_article_number": 950,
+    "expected_article_numbers": [
+      950
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter I الباب األول - Section II الفصل الثاني - المادة 950",
+    "reference": "A person lacking discretion may acquire possession by the intervention of his legal representative.",
+    "reference_source": "corpus: Latin-script text of article 950"
+  },
+  {
+    "id": "q056",
+    "language": "ar",
+    "question": "كيف يكتسب حق الارتفاق؟",
+    "expected_article_number": 1016,
+    "expected_article_numbers": [
+      1016
+    ],
+    "citation": "BOOK III الكتاب الثالث - Chapter II الباب الثاني - Section III الفصل الثالث - المادة 1016",
+    "reference": "The right to a servitude is acquired by a legal disposition or by inheritance. Only apparent servitudes, including rights of way, can be acquired by prescription.",
+    "reference_source": "corpus: Latin-script text of article 1016"
+  },
+  {
+    "id": "q057",
+    "language": "ar",
+    "question": "ما الأموال التي يجوز أن تكون محلا للرهن الحيازي؟",
+    "expected_article_number": 1097,
+    "expected_article_numbers": [
+      1097
+    ],
+    "citation": "BOOK IV الكتاب الرابع - Chapter III الباب الثالث - Section I الفصل األول - المادة 1097",
+    "reference": "Only movables or immovables which can be sold independently by public auction may be the object of a pledge.",
+    "reference_source": "corpus: Latin-script text of article 1097"
   }
 ]

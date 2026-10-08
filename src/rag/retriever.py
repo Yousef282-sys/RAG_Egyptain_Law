@@ -29,7 +29,8 @@ class Retriever:
         if not question or not question.strip():
             return []
         k = top_k if top_k is not None else self.top_k
-        query_vector = self.embedder.embed([question])[0]
+        embed_query = getattr(self.embedder, "embed_query", None)
+        query_vector = embed_query(question) if embed_query else self.embedder.embed([question])[0]
         raw_results = self.store.search(query_vector, top_k=k)
         return [
             {
@@ -37,6 +38,12 @@ class Retriever:
                 "text_ar": r.get("text_ar"),
                 "text_en": r.get("text_en"),
                 "citation": r.get("citation"),
+                "book": r.get("book"),
+                "chapter": r.get("chapter"),
+                "section": r.get("section"),
+                "topic": r.get("topic"),
+                "source_page": r.get("source_page"),
+                "is_repealed": r.get("is_repealed"),
                 "score": r.get("score"),
             }
             for r in raw_results

@@ -1,29 +1,45 @@
-"""Local vector store for the RAG pipeline.
+"""Persistent vector store for the RAG pipeline.
 
-Primary backend: Chroma (persistent, local, on-disk), used if the
-`chromadb` package is available.
+Backends (same on-disk directory, `data/vector_store/` by default; a
+`manifest.json` records which backend and embedder built the index):
 
-Fallback backend: THIS DEVELOPMENT SANDBOX does not have `chromadb`
-installed and has no network access to install it, so a simple
-numpy-based store (cosine similarity over an in-memory matrix, persisted
-as .npy + JSON metadata) is used instead. Same on-disk directory either
-way (`data/vector_store/` by default), so `retriever.py` and callers do
-not need to know which backend actually built the index -- a manifest
-file records which one was used.
+* ChromaVectorStore -- the vector database (persistent, on-disk), used when
+  `chromadb` is installed.
+* SimpleVectorStore -- numpy cosine-similarity fallback (.npy + JSON), used
+  when chromadb is unavailable (e.g. the offline development sandbox).
+
+Loading is driven by the MANIFEST, not by "whatever is installed": an index
+built by one backend is always reopened with that backend (Phase 1 built
+with numpy but loaded with Chroma whenever chromadb was installed -- the
+two never matched in a real environment). Set VECTOR_STORE_BACKEND
+(`auto` | `chroma` | `simple`) to choose the backend when BUILDING.
+
+Every chunk's metadata is preserved end to end: article_number, citation,
+book, chapter, section, topic, source_page, is_repealed (plus chunk ids/
+indices and both text fields), so article-based citations stay intact.
+`manifest.json` additionally records the embedder configuration
+(`embedding_kind` is "semantic" or "tfidf-lexical" -- never conflated) and
+the chunking parameters / corpus hash the index was built from.
+
+The Chroma code path has NOT been executed against a real chromadb in the
+development sandbox (not installed, no network); it is exercised only
+against an in-memory stand-in in tests/test_vector_store_backends.py.
 """
 from __future__ import annotations
 
+import hashlib
 import json
+import os
+from dataclasses import fields
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
 import numpy as np
 
-from .chunking import Chunk, chunk_articles, load_articles
+from .chunking import MAX_CHUNK_CHARS, Chunk, chunk_articles, load_articles
 from .embeddings import (
-    DEFAULT_MODEL_NAME,
-    SentenceTransformerEmbedder,
     TfidfFallbackEmbedder,
+    embedder_from_manifest,
     get_embedder,
 )
 
@@ -34,27 +50,66 @@ _METADATA_FILE = "metadata.json"
 _MANIFEST_FILE = "manifest.json"
 _TFIDF_FILE = "tfidf_vectorizer.pkl"
 
+BACKEND_CHROMA = "chromadb"
+BACKEND_SIMPLE = "simple-numpy"
+
+# Every field of a Chunk is stored and returned on search.
+CHUNK_FIELDS = [f.name for f in fields(Chunk)]
+
 
 def _chunk_text_for_embedding(chunk: Chunk) -> str:
-    # Arabic is the primary language of the corpus; fall back to English
-    # only for the one known Day-1 case where text_ar is empty (art. 1022).
-    return chunk.text_ar or chunk.text_en or ""
+    # Full article text (text_ar + text_en): the corpus fields are
+    # interleaved, not language-pure -- see chunking.full_text.
+    return chunk.full_text()
+
+
+def _make_manifest(
+    backend: str, embedder, chunks: List[Chunk], build_info: Optional[Dict[str, Any]]
+) -> Dict[str, Any]:
+    describe = embedder.describe() if hasattr(embedder, "describe") else {
+        "embedder_class": type(embedder).__name__,
+        "embedder_model": getattr(embedder, "model_name", "unknown"),
+        "embedding_kind": getattr(embedder, "kind", "unknown"),
+    }
+    manifest: Dict[str, Any] = {
+        "backend": backend,
+        **describe,
+        "chunk_count": len(chunks),
+        "article_count": len({c.article_number for c in chunks}),
+    }
+    if build_info:
+        manifest.update(build_info)
+    return manifest
+
+
+def _write_manifest(directory: Path, manifest: Dict[str, Any]) -> None:
+    with open(directory / _MANIFEST_FILE, "w", encoding="utf-8") as f:
+        json.dump(manifest, f, ensure_ascii=False, indent=2)
+
+
+def read_manifest(directory: str | Path) -> Optional[Dict[str, Any]]:
+    path = Path(directory) / _MANIFEST_FILE
+    if not path.exists():
+        return None
+    with open(path, encoding="utf-8") as f:
+        return json.load(f)
 
 
 class SimpleVectorStore:
-    """numpy-backed cosine-similarity store (the fallback actually used
-    in this sandbox, since chromadb is unavailable).
+    """numpy-backed cosine-similarity store (fallback when chromadb is
+    unavailable).
     """
 
     def __init__(self, directory: str | Path = DEFAULT_STORE_DIR):
         self.directory = Path(directory)
 
-    def build(self, chunks: List[Chunk], embedder=None) -> None:
+    def build(self, chunks: List[Chunk], embedder=None, build_info=None) -> None:
         self.directory.mkdir(parents=True, exist_ok=True)
         embedder = embedder or get_embedder()
         texts = [_chunk_text_for_embedding(c) for c in chunks]
 
-        vectors = np.asarray(embedder.embed(texts), dtype="float32")
+        embed_documents = getattr(embedder, "embed_documents", embedder.embed)
+        vectors = np.asarray(embed_documents(texts), dtype="float32")
         norms = np.linalg.norm(vectors, axis=1, keepdims=True)
         norms[norms == 0] = 1.0
         vectors = vectors / norms
@@ -64,25 +119,16 @@ class SimpleVectorStore:
         with open(self.directory / _METADATA_FILE, "w", encoding="utf-8") as f:
             json.dump(metadata, f, ensure_ascii=False)
 
-        manifest = {
-            "backend": "simple-numpy",
-            "embedder_model": getattr(embedder, "model_name", "unknown"),
-            "embedder_class": type(embedder).__name__,
-            "chunk_count": len(chunks),
-        }
-        with open(self.directory / _MANIFEST_FILE, "w", encoding="utf-8") as f:
-            json.dump(manifest, f, ensure_ascii=False, indent=2)
-
+        _write_manifest(
+            self.directory, _make_manifest(BACKEND_SIMPLE, embedder, chunks, build_info)
+        )
         if isinstance(embedder, TfidfFallbackEmbedder):
             embedder.save(self.directory / _TFIDF_FILE)
 
     def load_embedder(self):
-        with open(self.directory / _MANIFEST_FILE, encoding="utf-8") as f:
-            manifest = json.load(f)
-        tfidf_path = self.directory / _TFIDF_FILE
-        if tfidf_path.exists():
-            return TfidfFallbackEmbedder.load(tfidf_path)
-        return SentenceTransformerEmbedder(manifest.get("embedder_model", DEFAULT_MODEL_NAME))
+        return embedder_from_manifest(
+            read_manifest(self.directory) or {}, self.directory / _TFIDF_FILE
+        )
 
     def search(self, query_vector: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]:
         vectors = np.load(self.directory / _VECTORS_FILE)
@@ -107,12 +153,17 @@ class SimpleVectorStore:
 
 
 class ChromaVectorStore:
-    """Chroma-backed persistent store. Requires the `chromadb` package,
-    which is NOT installed in this development sandbox (no network here
-    to install it), so this class is untested in this sandbox -- it is
-    written to the same interface as SimpleVectorStore and should work
-    as-is once chromadb is available (see README).
+    """Chroma-backed persistent vector database. Requires `chromadb`.
+
+    * cosine space, so `score` is cosine similarity (1 - distance), the same
+      meaning and direction as SimpleVectorStore's score;
+    * `build` replaces the collection, so rebuilding with different
+      chunking never leaves stale chunks behind;
+    * Chroma metadata must be flat scalars without None, so None-valued
+      fields are dropped on write and restored as None on read.
     """
+
+    COLLECTION = "civil_code"
 
     def __init__(self, directory: str | Path = DEFAULT_STORE_DIR):
         import chromadb  # raises ImportError if unavailable
@@ -120,71 +171,125 @@ class ChromaVectorStore:
         self.directory = Path(directory)
         self.directory.mkdir(parents=True, exist_ok=True)
         self._client = chromadb.PersistentClient(path=str(self.directory))
-        self._collection = self._client.get_or_create_collection("civil_code")
 
-    def build(self, chunks: List[Chunk], embedder=None) -> None:
+    def _collection(self, create: bool = False):
+        if create:
+            try:
+                self._client.delete_collection(self.COLLECTION)
+            except Exception:  # collection did not exist yet
+                pass
+            return self._client.create_collection(
+                self.COLLECTION, metadata={"hnsw:space": "cosine"}
+            )
+        return self._client.get_collection(self.COLLECTION)
+
+    def build(self, chunks: List[Chunk], embedder=None, build_info=None) -> None:
         embedder = embedder or get_embedder()
         texts = [_chunk_text_for_embedding(c) for c in chunks]
-        vectors = np.asarray(embedder.embed(texts), dtype="float32")
-        self._collection.upsert(
-            ids=[c.chunk_id for c in chunks],
-            embeddings=vectors.tolist(),
-            documents=texts,
-            metadatas=[c.to_dict() for c in chunks],
+        embed_documents = getattr(embedder, "embed_documents", embedder.embed)
+        vectors = np.asarray(embed_documents(texts), dtype="float32")
+        collection = self._collection(create=True)
+        batch = 500
+        for start in range(0, len(chunks), batch):
+            part = chunks[start : start + batch]
+            collection.upsert(
+                ids=[c.chunk_id for c in part],
+                embeddings=vectors[start : start + batch].tolist(),
+                documents=texts[start : start + batch],
+                metadatas=[
+                    {k: v for k, v in c.to_dict().items() if v is not None} for c in part
+                ],
+            )
+        _write_manifest(
+            self.directory, _make_manifest(BACKEND_CHROMA, embedder, chunks, build_info)
         )
-        manifest = {
-            "backend": "chromadb",
-            "embedder_model": getattr(embedder, "model_name", "unknown"),
-            "embedder_class": type(embedder).__name__,
-            "chunk_count": len(chunks),
-        }
-        with open(self.directory / _MANIFEST_FILE, "w", encoding="utf-8") as f:
-            json.dump(manifest, f, ensure_ascii=False, indent=2)
         if isinstance(embedder, TfidfFallbackEmbedder):
             embedder.save(self.directory / _TFIDF_FILE)
 
     def load_embedder(self):
-        with open(self.directory / _MANIFEST_FILE, encoding="utf-8") as f:
-            manifest = json.load(f)
-        tfidf_path = self.directory / _TFIDF_FILE
-        if tfidf_path.exists():
-            return TfidfFallbackEmbedder.load(tfidf_path)
-        return SentenceTransformerEmbedder(manifest.get("embedder_model", DEFAULT_MODEL_NAME))
+        return embedder_from_manifest(
+            read_manifest(self.directory) or {}, self.directory / _TFIDF_FILE
+        )
 
     def search(self, query_vector: np.ndarray, top_k: int = 5) -> List[Dict[str, Any]]:
-        raw = self._collection.query(
+        collection = self._collection()
+        n = collection.count()
+        if n == 0:
+            return []
+        raw = collection.query(
             query_embeddings=[np.asarray(query_vector, dtype="float32").tolist()],
-            n_results=top_k,
+            n_results=min(top_k, n),
         )
         results = []
         for metadata, distance in zip(raw["metadatas"][0], raw["distances"][0]):
-            item = dict(metadata)
-            item["score"] = float(distance)
+            item = {name: metadata.get(name) for name in CHUNK_FIELDS}
+            item["score"] = 1.0 - float(distance)  # cosine distance -> similarity
             results.append(item)
         return results
 
 
-def get_vector_store(directory: str | Path = DEFAULT_STORE_DIR):
-    """Return a Chroma-backed store if `chromadb` is installed, otherwise
-    the numpy fallback actually used in this sandbox.
+def resolve_vector_backend(backend: Optional[str] = None) -> str:
+    value = (backend or os.environ.get("VECTOR_STORE_BACKEND") or "auto").strip().lower()
+    if value not in ("auto", "chroma", "simple"):
+        raise ValueError(f"VECTOR_STORE_BACKEND must be auto|chroma|simple, got {value!r}")
+    return value
+
+
+def get_vector_store(directory: str | Path = DEFAULT_STORE_DIR, backend: Optional[str] = None):
+    """Open (or, with no manifest yet, choose a backend for) a store.
+
+    An existing index is ALWAYS reopened with the backend recorded in its
+    manifest. Otherwise: "chroma" is strict (ImportError if missing),
+    "simple" uses numpy, "auto" prefers Chroma when installed.
     """
+    manifest = read_manifest(directory)
+    if manifest is not None and manifest.get("backend") == BACKEND_CHROMA:
+        return ChromaVectorStore(directory)  # ImportError if chromadb missing: honest
+    if manifest is not None and manifest.get("backend") == BACKEND_SIMPLE:
+        return SimpleVectorStore(directory)
+
+    choice = resolve_vector_backend(backend)
+    if choice == "simple":
+        return SimpleVectorStore(directory)
+    if choice == "chroma":
+        return ChromaVectorStore(directory)
     try:
         return ChromaVectorStore(directory)
     except ImportError:
         return SimpleVectorStore(directory)
 
 
+def file_sha256(path: str | Path) -> str:
+    h = hashlib.sha256()
+    with open(path, "rb") as f:
+        for block in iter(lambda: f.read(1 << 20), b""):
+            h.update(block)
+    return h.hexdigest()
+
+
 def build_index_from_json(
     json_path: str | Path,
     store_dir: str | Path = DEFAULT_STORE_DIR,
     embedder=None,
+    chunk_size: int = MAX_CHUNK_CHARS,
+    overlap: int = 0,
+    backend: Optional[str] = None,
 ) -> Dict[str, Any]:
-    """Convenience entry point: JSON articles -> chunks -> embeddings ->
-    persisted vector store. Returns the manifest dict for logging.
+    """JSON articles -> chunks -> embeddings -> persisted vector store.
+    Returns the manifest dict (embedder config, chunking params, corpus
+    sha256) for logging / reproducibility.
     """
     articles = load_articles(json_path)
-    chunks = chunk_articles(articles)
-    store = SimpleVectorStore(store_dir)
-    store.build(chunks, embedder=embedder)
-    with open(Path(store_dir) / _MANIFEST_FILE, encoding="utf-8") as f:
-        return json.load(f)
+    chunks = chunk_articles(articles, max_chars=chunk_size, overlap=overlap)
+    store = get_vector_store(store_dir, backend=backend)
+    store.build(
+        chunks,
+        embedder=embedder,
+        build_info={
+            "chunk_size": chunk_size,
+            "overlap": overlap,
+            "corpus_path": str(json_path),
+            "corpus_sha256": file_sha256(json_path),
+        },
+    )
+    return read_manifest(store_dir)

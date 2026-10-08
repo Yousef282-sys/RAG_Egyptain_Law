@@ -18,8 +18,11 @@ services:
       print(build_index_from_json('data/processed/civil_code.json', '/index'))"
     environment:
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-sentence-transformers}
+      HF_HOME: /hf_cache
     volumes:
       - vector_store:/index
+      - hf_cache:/hf_cache
     restart: "no"
 
   api:
@@ -37,8 +40,12 @@ services:
       VLLM_BASE_URL: ${VLLM_BASE_URL:-http://vllm:8001/v1}
       VLLM_API_KEY: ${VLLM_API_KEY:-}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
+      EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-sentence-transformers}
+      HF_HOME: /hf_cache
+    # NOT read-only: a Chroma index is a sqlite database and needs write access.
     volumes:
-      - vector_store:/index:ro
+      - vector_store:/index
+      - hf_cache:/hf_cache
 
   vllm:
     profiles: ["gpu"]

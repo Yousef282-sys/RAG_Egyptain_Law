@@ -251,6 +251,26 @@ labelled **retrieval-only** mode (`/health` reports `generation_is_llm`).
 the HTTP/SSE handling is tested against a local fake server only.
 `docker compose --profile gpu up` starts the vLLM service (needs a GPU).
 
+### Phase 2: semantic RAG, evaluation, MLflow
+
+Status legend: **VERIFIED** = executed here with real output; **UNVERIFIED** = implemented and unit-tested against stand-ins, never executed against the real package/service; **BLOCKED** = needs something this sandbox lacks.
+
+* **Embeddings.** `EMBEDDING_BACKEND` = `sentence-transformers` (strict, errors if the model can't load), `tfidf` (explicit lexical fallback), or `auto` (semantic, else TF-IDF *with a warning*). `EMBEDDING_MODEL` (and optional `EMBEDDING_MODEL_REVISION`) pick the model; e5 models automatically get `query: `/`passage: ` prefixes. Every index manifest records `embedding_kind` (`semantic` | `tfidf-lexical`), model, prefixes, chunk size, overlap and the corpus SHA-256, and `/health` reports `semantic_embeddings`. Reloading an index rebuilds the identical embedder from its manifest. TF-IDF is never labelled semantic. *Real semantic model: UNVERIFIED/BLOCKED (not installed, no network).*
+* **Corpus finding.** `text_ar`/`text_en` are *not* language-pure (two-column PDF interleaved): the article is `text_ar + text_en`. Embedding, `sources[].text` and RAGAS contexts now use the full text (`chunking.full_text`); Phase 1 used only `text_ar`.
+* **Vector DB.** Chroma (cosine) when installed, numpy store otherwise; an existing index is always reopened with the backend in its manifest. Metadata preserved: article_number, citation, book, chapter, section, topic, source_page, is_repealed. *Numpy path VERIFIED; real chromadb UNVERIFIED.*
+* **Eval set.** `data/eval/retrieval_eval.json`: 57 questions (28 EN, 29 AR), one expected article each, with a corpus-extracted `reference`. The original 15 snippet checks are in `data/eval/selfretrieval_snippets.json`. *VERIFIED.*
+* **RAGAS + gate.** `src/experiments/ragas_eval.py` scores faithfulness, answer relevancy, context precision and context recall over the real service (retrieve → vLLM). `python scripts/ragas_gate.py` exits 0 only if faithfulness ≥ 0.75 (`RAGAS_FAITHFULNESS_THRESHOLD`); exit 1 = a requirement is unmet (ragas, `GENERATION_MODEL`, `RAGAS_JUDGE_MODEL` + endpoint/key, valid ≥50-question set), exit 2 = below threshold; unscorable rows count as 0. *Gate logic VERIFIED; no RAGAS score has ever been computed (UNVERIFIED/BLOCKED).*
+* **Experiments (7 configs).** `python -m src.experiments.run_experiments` — deterministic command once the packages and a vLLM server exist:
+
+```
+pip install -e ".[rag,api,experiments,ragas]"
+export MLFLOW_TRACKING_URI=sqlite:///mlflow.db EMBEDDING_BACKEND=sentence-transformers
+export GENERATION_MODEL=<model> VLLM_BASE_URL=http://localhost:8001/v1
+export RAGAS_JUDGE_MODEL=<judge> RAGAS_JUDGE_BASE_URL=<url>
+python -m src.experiments.run_experiments --with-ragas yes --require-mlflow --register
+```
+  Each run logs chunk_size, overlap, embedding_model, faithfulness (+3 RAGAS metrics), hit@k/MRR and artifacts. The best run is chosen by faithfulness if every run has it, otherwise MRR@10 (`tracking.select_best_run`), and `--register` registers it (config + index as an MLflow pyfunc model, alias `champion`). Without the packages, semantic configs are *skipped* with a reason, MLflow logging is skipped, and `reports/phase2_experiment_results.json` says so. **VERIFIED here: the 2 TF-IDF control runs (hit@5 0.860 / 0.789 on the 57 questions, lexical only). UNVERIFIED: all semantic runs, RAGAS, MLflow runs, registry.**
+
 ### Run the API
 Requires the `api` extra (`fastapi`, `pydantic>=2`, `uvicorn`) — **not
 installed in this sandbox**; install and run in an environment with

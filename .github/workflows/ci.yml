@@ -64,25 +64,28 @@ jobs:
         with:
           python-version: "3.11"
           cache: "pip"
-      - name: Install project
-        run: pip install -e "."
-      # Day 7 fix: was `pip install ragas datasets` as a hand-written,
-      # unpinned pair -- now goes through the project's own `ragas`
-      # extra like every other dependency here. `|| true`: this install
-      # is allowed to fail -- the gate script itself must still run and
-      # report honestly either way, never silently skipped.
-      - name: Attempt real RAGAS evaluation (still fails closed here -- see script docstring for why)
-        run: |
-          pip install -e ".[ragas]" || true
-          python3 scripts/ragas_gate.py
+      - name: Install project (rag + ragas extras)
+        run: pip install -e ".[rag,ragas]"
+      # REQUIRED quality gate: real RAGAS evaluation over the curated
+      # eval set (>= 50 questions). Fails the job (nonzero exit) when
+      #   - any requirement is unmet (exit 1, fail-closed): ragas, a
+      #     reachable vLLM generation endpoint (GENERATION_MODEL /
+      #     VLLM_BASE_URL) or judge LLM (RAGAS_JUDGE_*) -- configure them
+      #     as repository variables/secrets; or
+      #   - faithfulness < 0.75 (exit 2).
+      # It has NEVER run on GitHub or against a real vLLM/judge (UNVERIFIED);
+      # until the variables below are configured it fails closed by design.
+      - name: RAGAS faithfulness gate (threshold 0.75)
+        run: python3 scripts/ragas_gate.py
         env:
-          RAGAS_FAITHFULNESS_THRESHOLD: "0.7"
-      # This job is EXPECTED to fail as of Day 6: the pipeline has no
-      # real generation backend yet (retrieval-only by design through
-      # Day 5), so scripts/ragas_gate.py fails closed regardless of
-      # whether `ragas` itself installs successfully. This is documented,
-      # intentional, fail-closed behavior for a required release check --
-      # not a workflow bug to silence. See README "RAGAS gate activation".
+          RAGAS_FAITHFULNESS_THRESHOLD: "0.75"
+          EMBEDDING_BACKEND: "sentence-transformers"
+          GENERATION_MODEL: ${{ vars.GENERATION_MODEL }}
+          VLLM_BASE_URL: ${{ vars.VLLM_BASE_URL }}
+          VLLM_API_KEY: ${{ secrets.VLLM_API_KEY }}
+          RAGAS_JUDGE_MODEL: ${{ vars.RAGAS_JUDGE_MODEL }}
+          RAGAS_JUDGE_BASE_URL: ${{ vars.RAGAS_JUDGE_BASE_URL }}
+          RAGAS_JUDGE_API_KEY: ${{ secrets.RAGAS_JUDGE_API_KEY }}
 
   dvc-pipeline:
     name: DVC pipeline (dvc repro) -- currently blocked, see step below

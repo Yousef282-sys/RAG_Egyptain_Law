@@ -1079,3 +1079,18 @@ MD5 `ac90c9c1001e961d7aa451ca6984c1c8`, 1095 articles — unchanged.
 `21840e2` — "Day 9: requirement traceability matrix, integration audit
 (1 real gap fixed), integration tests, release readiness, submission
 checklists"
+
+
+---
+
+# PHASE 2 (semantic RAG + evaluation + MLflow foundation)
+
+## Status: code COMPLETE; everything needing sentence-transformers / chromadb / ragas / mlflow / vLLM is UNVERIFIED (not installable here, no network)
+
+**Implemented:** strict/auto/tfidf embedding backends with labelled `embedding_kind`; manifest-driven vector-store backend (fixes Phase 1 build/load mismatch), Chroma fixes (cosine, None-metadata, clean rebuild), chunk `overlap`; full-article text (`text_ar + text_en`) for embedding/sources/contexts; 57-question curated bilingual eval set with corpus-extracted references; four-metric RAGAS integration; faithfulness gate at 0.75 (exit 1/2/0); 7-config MLflow runner, documented best-run selection, registry via pyfunc model; compose index volume made writable + HF cache.
+
+**VERIFIED (real execution):** 253 tests passed / 0 failed / 21 skipped; curated set validates against corpus; 2 TF-IDF control runs on the 57 questions (config tfidf_control_c1000: hit@5 0.860, MRR@10 0.747; tfidf_control_bigram_c500_o100: hit@5 0.789, MRR@10 0.689) in `reports/phase2_experiment_results.json`; gate fails closed (exit 1) in this sandbox.
+
+**UNVERIFIED / BLOCKED:** any semantic-embedding result; real Chroma; RAGAS scores; MLflow runs and registry entries (none exist); vLLM generation. Tests for those use stand-ins (`tests/fakes.py`) that check our wiring only.
+
+**Caveats:** the eval questions were written from the article text, so they favour lexical overlap and are easier than real user questions; Articles 1 and 2 are duplicated in the corpus and excluded. Package versions are pinned to the APIs written against (`ragas>=0.2.6,<0.3`, `mlflow>=2.13,<3`) but never installed here.
