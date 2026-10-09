@@ -153,9 +153,40 @@ def register_best_configuration(
     config = selection["result"]["config"]
     with tempfile.TemporaryDirectory() as tmp:
         index_dir = Path(tmp) / "index"
-        build_config_index(config, index_dir, corpus_path)
         config_path = Path(tmp) / "rag_config.json"
         config_path.write_text(json.dumps(config, ensure_ascii=False, indent=2), encoding="utf-8")
+
+        # Build Chroma in a separate process to release SQLite handles on exit.
+        import subprocess
+        import sys
+
+        build_code = (
+            "import json, sys; "
+            "from src.experiments.index_builder import build_config_index; "
+            "config=json.load(open(sys.argv[1], encoding='utf-8')); "
+            "build_config_index(config, sys.argv[2], sys.argv[3])"
+        )
+        subprocess.run(
+            [sys.executable, "-c", build_code, str(config_path), str(index_dir), str(corpus_path)],
+            check=True,
+        )
+
+        # Package the index so MLflow does not access the live Chroma database.
+        import shutil
+        index_archive = Path(shutil.make_archive(
+            str(Path(tmp) / "index_bundle"),
+            "zip",
+            root_dir=tmp,
+            base_dir="index",
+        ))
+
+        model_code_path = Path(tmp) / "rag_model_entry.py"
+        model_code_path.write_text(
+            "from src.experiments.mlflow_model import RagRetrieverModel\n"
+            "import mlflow\n"
+            "mlflow.models.set_model(RagRetrieverModel())\n",
+            encoding="utf-8",
+        )
 
         mlflow.set_experiment(EXPERIMENT_NAME)
         with mlflow.start_run(run_name=f"register-{config['run_name']}") as run:
@@ -163,8 +194,8 @@ def register_best_configuration(
             mlflow.log_metric(selection["metric"], selection["value"])
             mlflow.pyfunc.log_model(
                 artifact_path="rag_model",
-                python_model=RagRetrieverModel(),
-                artifacts={"index": str(index_dir), "config": str(config_path)},
+                python_model=str(model_code_path),
+                artifacts={"index": str(index_archive), "config": str(config_path)},
                 code_paths=["src"],
                 pip_requirements=["numpy", "scikit-learn", "sentence-transformers", "chromadb"],
             )

@@ -14,3 +14,15 @@ data/raw/*.pdf
 mlruns/
 mlartifacts/
 
+
+# Local Python environment and package metadata
+.venv/
+arabic_legal_rag.egg-info/
+
+# Local secrets
+.env
+.env.*
+!.env.example
+*.bak
+logs/
+chroma.sqlite3

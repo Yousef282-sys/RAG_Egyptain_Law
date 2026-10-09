@@ -222,6 +222,12 @@ def run_one_configuration(
                 result["mlflow_logged"] = True
             except MLflowUnavailable as exc:
                 print(f"  [mlflow] not logged for '{config['run_name']}': {exc}")
+
+        # Release persistent Chroma file handles before TemporaryDirectory cleanup.
+        close_store = getattr(retriever.store, "close", None)
+        if callable(close_store):
+            close_store()
+
     return result
 
 
@@ -230,6 +236,7 @@ def run_all(
     eval_set_path: str = str(DEFAULT_EVAL_SET_PATH),
     with_ragas: str = "auto",
     require_mlflow: bool = False,
+    log_to_mlflow: bool = True,
     register: bool = False,
     results_path: Path = RESULTS_PATH,
 ) -> Dict[str, Any]:
@@ -257,7 +264,7 @@ def run_all(
     results = []
     for config in configurations:
         print(f"Running configuration: {config['run_name']} ...")
-        result = run_one_configuration(config, eval_set, eval_set_path, judges)
+        result = run_one_configuration(config, eval_set, eval_set_path, judges, log_to_mlflow=log_to_mlflow)
         results.append(result)
         if result["status"] == "completed":
             print(f"  metrics: {result['metrics']}")

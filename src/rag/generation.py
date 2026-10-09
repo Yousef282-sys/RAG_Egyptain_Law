@@ -173,19 +173,122 @@ class VLLMGenerator:
                     yield piece
 
 
+
+class GroqGenerator:
+    """Generator using the Groq chat-completions API."""
+
+    is_llm = True
+
+    def __init__(
+        self,
+        api_key: str,
+        model: str = "llama-3.3-70b-versatile",
+        max_tokens: int = 512,
+        temperature: float = 0.0,
+        timeout_s: float = 60.0,
+    ):
+        if not api_key:
+            raise ValueError("GROQ_API_KEY is required for the Groq backend")
+        if not model:
+            raise ValueError("GROQ_MODEL must be a non-empty model name")
+
+        from groq import Groq
+
+        self.model = model
+        self.name = f"groq:{model}"
+        self.max_tokens = max_tokens
+        self.temperature = temperature
+        self.client = Groq(api_key=api_key, timeout=timeout_s)
+
+    def generate(self, question: str, sources: List[Dict[str, Any]]) -> str:
+        if not sources:
+            return _NO_CONTEXT_ANSWER
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=build_messages(question, sources),
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+            )
+            content = response.choices[0].message.content
+            if not content:
+                raise GenerationError("Groq returned an empty response")
+            return content
+        except GenerationError:
+            raise
+        except Exception as exc:
+            status = getattr(exc, "status_code", None)
+            detail = f" (HTTP {status})" if status else ""
+            raise GenerationError(
+                f"Groq generation request failed{detail}: {type(exc).__name__}"
+            ) from exc
+
+    def stream(self, question: str, sources: List[Dict[str, Any]]) -> Iterator[str]:
+        if not sources:
+            yield _NO_CONTEXT_ANSWER
+            return
+
+        try:
+            response = self.client.chat.completions.create(
+                model=self.model,
+                messages=build_messages(question, sources),
+                max_tokens=self.max_tokens,
+                temperature=self.temperature,
+                stream=True,
+            )
+            for chunk in response:
+                if not chunk.choices:
+                    continue
+                piece = chunk.choices[0].delta.content
+                if piece:
+                    yield piece
+        except GenerationError:
+            raise
+        except Exception as exc:
+            status = getattr(exc, "status_code", None)
+            detail = f" (HTTP {status})" if status else ""
+            raise GenerationError(
+                f"Groq streaming request failed{detail}: {type(exc).__name__}"
+            ) from exc
+
+
 def get_generator() -> Generator:
-    """vLLM if GENERATION_MODEL is set, otherwise the labelled fallback."""
+    """Choose vLLM, Groq, or the labelled retrieval-only fallback."""
+    # Preserve existing vLLM configuration and behaviour.
     model = os.environ.get("GENERATION_MODEL", "").strip()
-    if not model:
-        return RetrievalOnlyGenerator()
-    return VLLMGenerator(
-        model=model,
-        base_url=os.environ.get("VLLM_BASE_URL", "http://localhost:8001/v1"),
-        api_key=os.environ.get("VLLM_API_KEY") or None,
-        max_tokens=int(os.environ.get("GENERATION_MAX_TOKENS", "512")),
-        temperature=float(os.environ.get("GENERATION_TEMPERATURE", "0.0")),
-        timeout_s=float(os.environ.get("GENERATION_TIMEOUT_S", "60")),
-    )
+    if model:
+        return VLLMGenerator(
+            model=model,
+            base_url=os.environ.get("VLLM_BASE_URL", "http://localhost:8001/v1"),
+            api_key=os.environ.get("VLLM_API_KEY") or None,
+            max_tokens=int(os.environ.get("GENERATION_MAX_TOKENS", "512")),
+            temperature=float(os.environ.get("GENERATION_TEMPERATURE", "0.0")),
+            timeout_s=float(os.environ.get("GENERATION_TIMEOUT_S", "60")),
+        )
+
+    backend = os.environ.get("GENERATION_BACKEND", "retrieval-only").strip().lower()
+    if backend == "groq":
+        api_key = os.environ.get("GROQ_API_KEY", "").strip()
+        if not api_key:
+            raise ValueError(
+                "GENERATION_BACKEND=groq requires the GROQ_API_KEY environment variable"
+            )
+        return GroqGenerator(
+            api_key=api_key,
+            model=os.environ.get(
+                "GROQ_MODEL", "llama-3.3-70b-versatile"
+            ).strip(),
+            max_tokens=int(os.environ.get("GENERATION_MAX_TOKENS", "512")),
+            temperature=float(os.environ.get("GENERATION_TEMPERATURE", "0.0")),
+            timeout_s=float(os.environ.get("GENERATION_TIMEOUT_S", "60")),
+        )
+
+    if backend not in ("", "retrieval-only"):
+        raise ValueError(
+            f"Unsupported GENERATION_BACKEND: {backend}. Use 'groq' or 'retrieval-only'."
+        )
+    return RetrievalOnlyGenerator()
 
 
 def as_ragas_generate_fn(generator: Generator):

@@ -1,21 +1,10 @@
-# Arabic Legal RAG -- API + one-shot indexer + optional vLLM server.
-#
-# UNVERIFIED: not run in the development sandbox (no docker, no GPU, no
-# network). Structure is checked by tests/test_docker_config.py only.
-#
-#   docker compose up --build                 # indexer + api (retrieval-only unless GENERATION_MODEL set)
-#   GENERATION_MODEL=<hf-model> docker compose --profile gpu up --build
-#                                             # + vLLM server (needs NVIDIA GPU + container toolkit)
-#
-# The vector index lives in the named volume `vector_store`, built by the
-# `indexer` service from data/processed/civil_code.json (not baked into the
-# image). The API image is the repo Dockerfile.
-services:
+﻿services:
   indexer:
     build: .
-    command: >
-      python -c "from src.rag.vector_store import build_index_from_json;
-      print(build_index_from_json('data/processed/civil_code.json', '/index'))"
+    command:
+      - python
+      - -c
+      - "from src.rag.vector_store import build_index_from_json; print(build_index_from_json('data/processed/civil_code.json', '/index'))"
     environment:
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
       EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-sentence-transformers}
@@ -35,22 +24,25 @@ services:
     environment:
       VECTOR_STORE_DIR: /index
       RAG_TOP_K: ${RAG_TOP_K:-5}
-      # Leave GENERATION_MODEL empty for labelled retrieval-only mode.
       GENERATION_MODEL: ${GENERATION_MODEL:-}
       VLLM_BASE_URL: ${VLLM_BASE_URL:-http://vllm:8001/v1}
       VLLM_API_KEY: ${VLLM_API_KEY:-}
       EMBEDDING_MODEL: ${EMBEDDING_MODEL:-sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2}
       EMBEDDING_BACKEND: ${EMBEDDING_BACKEND:-sentence-transformers}
       HF_HOME: /hf_cache
-    # NOT read-only: a Chroma index is a sqlite database and needs write access.
     volumes:
       - vector_store:/index
       - hf_cache:/hf_cache
 
   vllm:
-    profiles: ["gpu"]
+    profiles:
+      - gpu
     image: vllm/vllm-openai:latest
-    command: ["--model", "${GENERATION_MODEL:?set GENERATION_MODEL to the model to serve}", "--port", "8001"]
+    command:
+      - --model
+      - ${GENERATION_MODEL:-}
+      - --port
+      - "8001"
     ports:
       - "8001:8001"
     ipc: host
@@ -62,7 +54,8 @@ services:
           devices:
             - driver: nvidia
               count: 1
-              capabilities: [gpu]
+              capabilities:
+                - gpu
 
 volumes:
   vector_store:

@@ -40,7 +40,7 @@ def run_ingest(pdf_path: str, out_path: str) -> int:
 
     out = Path(out_path)
     out.parent.mkdir(parents=True, exist_ok=True)
-    with out.open("w", encoding="utf-8") as f:
+    with out.open("w", encoding="utf-8", newline="\n") as f:
         json.dump([a.to_dict() for a in articles], f, ensure_ascii=False, indent=2)
 
     report = validate_corpus(articles)

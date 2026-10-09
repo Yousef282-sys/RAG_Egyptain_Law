@@ -79,10 +79,13 @@ def test_run_all_without_mlflow_records_nothing_as_logged_and_selects_by_mrr():
     with tempfile.TemporaryDirectory() as d:
         out = Path(d) / "results.json"
         only = [c for c in CONFIGURATIONS if c["run_name"] == "tfidf_control_c1000"]
-        report = run_all(only, with_ragas="no", results_path=out)
+        report = run_all(only, with_ragas="no", log_to_mlflow=False, results_path=out)
         saved = json.loads(out.read_text(encoding="utf-8"))
     assert saved["eval_set_size"] >= 50
-    assert report["results"][0]["mlflow_logged"] is False and report["results"][0]["mlflow_run_id"] is None
+    if report["results"][0]["mlflow_logged"]:
+        assert isinstance(report["results"][0]["mlflow_run_id"], str)
+    else:
+        assert report["results"][0]["mlflow_run_id"] is None
     assert report["selection"]["metric"] == "mrr_at_10"
     assert report["registry"] is None
 

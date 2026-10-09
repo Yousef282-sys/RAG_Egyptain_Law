@@ -19,20 +19,40 @@ class RagRetrieverModel(mlflow.pyfunc.PythonModel):
     """
 
     def load_context(self, context):
+        import tempfile
+        import zipfile
+        from pathlib import Path
         from src.rag.retriever import Retriever
 
         with open(context.artifacts["config"], encoding="utf-8") as f:
             config = json.load(f)
-        self._retriever = Retriever(store_dir=context.artifacts["index"], top_k=config["top_k"])
+
+        self._index_tmp = tempfile.TemporaryDirectory(prefix="legal_rag_model_index_")
+        with zipfile.ZipFile(context.artifacts["index"], "r") as archive:
+            archive.extractall(self._index_tmp.name)
+
+        self._index_path = Path(self._index_tmp.name) / "index"
+        self._top_k = config["top_k"]
 
     def predict(self, context, model_input, params=None):
+        from src.rag.retriever import Retriever
+
         questions = (
             list(model_input["question"]) if hasattr(model_input, "columns") else list(model_input)
         )
-        return [
-            [
-                {"article_number": r["article_number"], "citation": r["citation"], "score": r["score"]}
-                for r in self._retriever.retrieve(q)
+        retriever = Retriever(store_dir=str(self._index_path), top_k=self._top_k)
+        try:
+            return [
+                [
+                    {
+                        "article_number": r["article_number"],
+                        "citation": r["citation"],
+                        "score": r["score"],
+                    }
+                    for r in retriever.retrieve(q)
+                ]
+                for q in questions
             ]
-            for q in questions
-        ]
+        finally:
+            retriever.close()
+            del retriever

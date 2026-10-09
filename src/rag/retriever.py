@@ -21,9 +21,23 @@ class Retriever:
         top_k: int = DEFAULT_TOP_K,
         store=None,
     ):
-        self.store = store or get_vector_store(store_dir)
+        if store is None:
+            manifest_path = Path(store_dir) / "manifest.json"
+            if not manifest_path.is_file():
+                raise FileNotFoundError(
+                    f"Vector index manifest not found at {manifest_path}. Build the index first."
+                )
+            self.store = get_vector_store(store_dir)
+        else:
+            self.store = store
         self.embedder = self.store.load_embedder()
         self.top_k = top_k
+
+    def close(self) -> None:
+        """Release resources owned by the underlying vector store."""
+        close_store = getattr(self.store, "close", None)
+        if callable(close_store):
+            close_store()
 
     def retrieve(self, question: str, top_k: Optional[int] = None) -> List[Dict[str, Any]]:
         if not question or not question.strip():

@@ -92,11 +92,12 @@ def test_pipeline_output_is_byte_for_byte_reproducible():
     import hashlib
     import subprocess
     import tempfile
+    import sys
 
     def run_ingest(out_path: str) -> str:
         subprocess.run(
             [
-                "python3", "-m", "src.ingestion.cli", "ingest",
+                sys.executable, "-m", "src.ingestion.cli", "ingest",
                 "--pdf", "data/raw/civil_code.pdf",
                 "--out", out_path,
             ],

@@ -111,8 +111,19 @@ def test_new_index_prefers_chroma_when_installed_and_simple_when_not_or_requeste
         with tempfile.TemporaryDirectory() as d:
             assert isinstance(get_vector_store(d), ChromaVectorStore)
             assert isinstance(get_vector_store(d, backend="simple"), SimpleVectorStore)
-    with tempfile.TemporaryDirectory() as d:  # chromadb absent in this sandbox
-        assert isinstance(get_vector_store(d), SimpleVectorStore)
+
+    # Simulate chromadb being unavailable, even if it is installed globally.
+    import sys
+    old_chromadb = sys.modules.get("chromadb")
+    sys.modules["chromadb"] = None
+    try:
+        with tempfile.TemporaryDirectory() as d:
+            assert isinstance(get_vector_store(d), SimpleVectorStore)
+    finally:
+        if old_chromadb is None:
+            sys.modules.pop("chromadb", None)
+        else:
+            sys.modules["chromadb"] = old_chromadb
 
 
 def test_chroma_index_without_chromadb_raises_instead_of_returning_wrong_store():

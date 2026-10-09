@@ -172,6 +172,13 @@ class ChromaVectorStore:
         self.directory.mkdir(parents=True, exist_ok=True)
         self._client = chromadb.PersistentClient(path=str(self.directory))
 
+    def close(self) -> None:
+        """Release the persistent Chroma client and its file handles."""
+        client = getattr(self, "_client", None)
+        if client is not None:
+            self._client = None
+            client.close()
+
     def _collection(self, create: bool = False):
         if create:
             try:
@@ -282,16 +289,24 @@ def build_index_from_json(
     articles = load_articles(json_path)
     chunks = chunk_articles(articles, max_chars=chunk_size, overlap=overlap)
     store = get_vector_store(store_dir, backend=backend)
-    store.build(
-        chunks,
-        embedder=embedder,
-        build_info={
-            "chunk_size": chunk_size,
-            "overlap": overlap,
-            "corpus_path": str(json_path),
-            "corpus_sha256": file_sha256(json_path),
-        },
-    )
+    try:
+        store.build(
+            chunks,
+            embedder=embedder,
+            build_info={
+                "chunk_size": chunk_size,
+                "overlap": overlap,
+                "corpus_path": str(json_path),
+                "corpus_sha256": file_sha256(json_path),
+            },
+        )
+    finally:
+        close = getattr(store, "close", None)
+        if callable(close):
+            close()
+        import gc
+        del store
+        gc.collect()
     return read_manifest(store_dir)
 
 

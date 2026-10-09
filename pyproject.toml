@@ -24,6 +24,7 @@ api = [
     "pydantic>=2.0",
     "uvicorn>=0.27",
     "httpx>=0.27",  # needed by fastapi.testclient.TestClient
+    "groq>=1.0",
 ]
 # Day 3 extras. Also NOT installable in this sandbox (no network).
 serving = ["bentoml>=1.2"]

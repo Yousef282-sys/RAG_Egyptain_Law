@@ -1,0 +1,43 @@
+schema: '2.0'
+stages:
+  extract_corpus:
+    cmd: python -m src.ingestion.cli ingest --pdf data/raw/civil_code.pdf --out
+      data/processed/civil_code.json
+    deps:
+    - path: data/raw/civil_code.pdf
+      hash: md5
+      md5: 5086ef5f16f15d856278db943e58e948
+      size: 2599703
+    - path: src/ingestion/arabic_utils.py
+      hash: md5
+      md5: a2315ff3771cc411ba2f2aeec5725df9
+      size: 5157
+    - path: src/ingestion/bidi_fix.py
+      hash: md5
+      md5: 7705fa201bafe0ae06f8949ad2e2b6bd
+      size: 2229
+    - path: src/ingestion/cli.py
+      hash: md5
+      md5: 96834d9dc05c1e837dd9c830bf0afd8a
+      size: 3004
+    - path: src/ingestion/parser.py
+      hash: md5
+      md5: c1aa6c551a8cda6b6c0ebea6be5041a1
+      size: 11637
+    - path: src/ingestion/pdf_reader.py
+      hash: md5
+      md5: d923d97212dec64e12b4ee88428dd09c
+      size: 1972
+    - path: src/ingestion/schema.py
+      hash: md5
+      md5: 7820024ab80f1f4820aa218495948c19
+      size: 686
+    - path: src/ingestion/validation.py
+      hash: md5
+      md5: a2789bb7714c026198288c9d896ef3cc
+      size: 3365
+    outs:
+    - path: data/processed/civil_code.json
+      hash: md5
+      md5: ac90c9c1001e961d7aa451ca6984c1c8
+      size: 1345184
