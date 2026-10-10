@@ -22,7 +22,6 @@ class RagRetrieverModel(mlflow.pyfunc.PythonModel):
         import tempfile
         import zipfile
         from pathlib import Path
-        from src.rag.retriever import Retriever
 
         with open(context.artifacts["config"], encoding="utf-8") as f:
             config = json.load(f)

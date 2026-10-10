@@ -147,8 +147,6 @@ def register_best_configuration(
     import tempfile
     from pathlib import Path
 
-    from src.experiments.index_builder import build_config_index
-    from src.experiments.mlflow_model import RagRetrieverModel
 
     config = selection["result"]["config"]
     with tempfile.TemporaryDirectory() as tmp:
@@ -288,7 +286,7 @@ def register_best_run_artifact(
     embedder.embed(texts)
 
     mlflow.set_experiment(EXPERIMENT_NAME)
-    with mlflow.start_run(run_name=f"register-{config['run_name']}") as run:
+    with mlflow.start_run(run_name=f"register-{config['run_name']}"):
         mlflow.log_params(config)
         model_info = mlflow.sklearn.log_model(embedder._vectorizer, "tfidf_vectorizer")
         registered = mlflow.register_model(model_info.model_uri, model_name)

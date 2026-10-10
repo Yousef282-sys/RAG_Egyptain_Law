@@ -6,7 +6,6 @@ verifies our wiring (cosine space, metadata round trip, rebuild, backend
 choice from the manifest), NOT the real chromadb.
 """
 import json
-import os
 import tempfile
 from pathlib import Path
 
