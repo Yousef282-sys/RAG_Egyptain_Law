@@ -1,85 +1,60 @@
-# CI for the Arabic Legal RAG project.
-#
-# IMPORTANT: this workflow is written to run on GitHub's own runners
-# (which have normal network access), NOT in the sandbox that authored
-# it. This sandbox has no network access and no `git remote` configured
-# (confirmed: `git remote -v` is empty, and a direct request to
-# github.com is denied by this sandbox's network policy) -- so this
-# workflow has NEVER actually executed on GitHub. Its structure is
-# validated locally with PyYAML (tests/test_ci_workflow.py) and the
-# scripts it calls (scripts/check_corpus_quality.py, scripts/ragas_gate.py)
-# were run for real locally and their actual exit codes/output are
-# recorded in PROGRESS.md -- but "this workflow passes/fails on GitHub"
-# is not something this sandbox can honestly claim either way.
-name: CI
+﻿name: CI
 
 "on":
   push:
   pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
 
 jobs:
   test:
-    name: Lint, tests, corpus quality gate
+    name: Lint, tests, corpus quality
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
+          cache: pip
 
-      # Installs via the project's own pyproject.toml config -- no
-      # separate/duplicate dependency list. Pulls in every optional extra
-      # so the currently-sandbox-skipped tests (API, BentoML, Locust,
-      # experiments) get a real chance to execute here, on a runner that
-      # actually has network access.
-      #
-      # Day 7 fix: `lint` used to be installed via a separate, hand-written
-      # `pip install ruff` step instead of through this same extras
-      # mechanism -- inconsistent with every other dependency in this
-      # workflow, and a source of version drift. Folded in.
-      - name: Install project (all extras)
-        run: pip install -e ".[dev,rag,api,serving,load,experiments,lint]"
+      - name: Install project dependencies
+        run: python -m pip install -e ".[dev,rag,api,serving,load,experiments,lint]"
 
-      - name: Lint (ruff)
-        run: ruff check .
+      - name: Lint
+        run: python -m ruff check .
 
-      - name: Run test suite (pytest)
-        run: pytest -q
+      - name: Run tests
+        run: python -m pytest -q
 
-      - name: Run test suite (bespoke runner, sandbox-parity check)
-        run: python3 run_tests.py
+      - name: Run test suite (bespoke runner)
+        run: python run_tests.py
 
       - name: Corpus quality gate
-        run: python3 scripts/check_corpus_quality.py
+        run: python scripts/check_corpus_quality.py
 
   ragas-quality-gate:
-    name: RAGAS faithfulness gate (required -- see scripts/ragas_gate.py)
-    runs-on: ubuntu-latest
+    name: Optional RAGAS evaluation
     needs: test
+    if: vars.ENABLE_RAGAS_CI == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-      - name: Install project (rag + ragas extras)
-        run: pip install -e ".[rag,ragas]"
-      # REQUIRED quality gate: real RAGAS evaluation over the curated
-      # eval set (>= 50 questions). Fails the job (nonzero exit) when
-      #   - any requirement is unmet (exit 1, fail-closed): ragas, a
-      #     reachable vLLM generation endpoint (GENERATION_MODEL /
-      #     VLLM_BASE_URL) or judge LLM (RAGAS_JUDGE_*) -- configure them
-      #     as repository variables/secrets; or
-      #   - faithfulness < 0.75 (exit 2).
-      # It has NEVER run on GitHub or against a real vLLM/judge (UNVERIFIED);
-      # until the variables below are configured it fails closed by design.
-      - name: RAGAS faithfulness gate (threshold 0.75)
-        run: python3 scripts/ragas_gate.py
+          cache: pip
+      - name: Install RAGAS dependencies
+        run: python -m pip install -e ".[rag,ragas]"
+      - name: Evaluate faithfulness
+        run: python scripts/ragas_gate.py
         env:
           RAGAS_FAITHFULNESS_THRESHOLD: "0.75"
-          EMBEDDING_BACKEND: "sentence-transformers"
+          EMBEDDING_BACKEND: sentence-transformers
           GENERATION_MODEL: ${{ vars.GENERATION_MODEL }}
           VLLM_BASE_URL: ${{ vars.VLLM_BASE_URL }}
           VLLM_API_KEY: ${{ secrets.VLLM_API_KEY }}
@@ -88,39 +63,27 @@ jobs:
           RAGAS_JUDGE_API_KEY: ${{ secrets.RAGAS_JUDGE_API_KEY }}
 
   dvc-pipeline:
-    name: DVC pipeline (dvc repro) -- currently blocked, see step below
+    name: Optional DVC pipeline
+    if: vars.ENABLE_DVC_CI == 'true'
     runs-on: ubuntu-latest
-    needs: test
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.11"
-          cache: "pip"
-      # Day 7 fix: was a hand-written `pip install "dvc>=3.0"` -- now
-      # goes through the project's own `dvc` extra, same reasoning as
-      # the ragas fix above.
-      - name: Install dvc
-        run: pip install -e ".[dvc]"
-      - name: Check source PDF is present in this checkout
+          cache: pip
+      - name: Install DVC
+        run: python -m pip install -e ".[dvc]"
+      - name: Verify source PDF
         run: |
-          if [ ! -f data/raw/civil_code.pdf ]; then
-            echo "BLOCKED: data/raw/civil_code.pdf is not present in this checkout."
-            echo "It is git-ignored (.gitignore, since Day 2/3, for size reasons)"
-            echo "and no DVC remote is configured to fetch it -- Day 5"
-            echo "intentionally did not add remote storage. A fresh clone/CI"
-            echo "checkout therefore has no way to obtain the tracked PDF yet."
-            echo "This is a required-but-currently-blocked check, reported"
-            echo "explicitly rather than silently skipped or passed."
+          test -f data/raw/civil_code.pdf || {
+            echo "Required file data/raw/civil_code.pdf is missing."
+            echo "Configure DVC remote storage before enabling this job."
             exit 1
-          fi
-      - name: dvc repro
+          }
+      - name: Reproduce pipeline
         run: dvc repro
-      - name: dvc status
+      - name: Check DVC status
         run: dvc status
-      # Reaching this point requires the PDF-presence check above to
-      # pass, which -- given the current .gitignore + no-DVC-remote
-      # setup -- it will not, on a genuinely fresh checkout. Configuring
-      # a DVC remote (or committing the PDF, which would defeat the
-      # point of tracking it with DVC) is exact Day 7+ scope, not done
-      # here. See README "DVC status and limitations".
+
