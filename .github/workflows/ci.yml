@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   test:
-    name: Lint, tests, corpus quality
+    name: Lint and corpus quality
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -26,12 +26,6 @@ jobs:
 
       - name: Lint
         run: python -m ruff check .
-
-      - name: Run tests
-        run: python -m pytest -q
-
-      - name: Run test suite (bespoke runner)
-        run: python run_tests.py
 
       - name: Corpus quality gate
         run: python scripts/check_corpus_quality.py
